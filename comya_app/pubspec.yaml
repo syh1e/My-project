@@ -75,8 +75,8 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: GmarketSansTTFBold
+    - family: GmarketSansTTFMedium
       fonts:
-        - asset: assets/fonts/GmarketSansTTFBold.ttf
+        - asset: assets/fonts/GmarketSansTTFMedium.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

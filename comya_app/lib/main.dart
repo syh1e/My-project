@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'GmarketSansTTFBold'),
+      theme: ThemeData(fontFamily: 'GmarketSansTTFMedium'),
       home: Scaffold(
         appBar: AppBar(
           centerTitle: true,
