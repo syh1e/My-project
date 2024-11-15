@@ -16,22 +16,15 @@ void main() {
 }
 
 class homepage extends StatelessWidget {
-  // 수정해야됨
+  // 2초뒤에 넘어가게 설정해뒀어요
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushNamed(context, '/login');
+    });
     return Scaffold(
-      appBar: AppBar(),
-      body: Container(
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/login');
-              },
-              child: Text("Start"),
-            )
-          ],
-        ),
+      body: Center(
+        child: Image.asset("loading.png"),
       ),
     );
   }
