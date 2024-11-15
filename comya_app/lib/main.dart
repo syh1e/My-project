@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -45,7 +46,7 @@ class loginpage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/select1page');
+                Navigator.pushNamed(context, '/select1');
               },
               child: Text("Button"),
             )
@@ -66,13 +67,13 @@ class select1page extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/walkpage');
+                Navigator.pushNamed(context, '/walk');
               },
               child: Text("Button"),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/runpage');
+                Navigator.pushNamed(context, '/run');
               },
               child: Text("Button"),
             )
@@ -114,7 +115,7 @@ class runpage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/login');
+                Navigator.pushNamed(context, '/');
               },
               child: Text("Button"),
             )
