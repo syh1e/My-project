@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:async';
 
 void main() {
   runApp(MaterialApp(
@@ -8,11 +9,76 @@ void main() {
     initialRoute: '/',
     routes: {
       '/': (context) => homepage(),
-      '/login': (context) => loginpage(),
-      '/select1': (context) => select1page(),
-      '/select2': (context) => select2page(),
+      '/login': (context) => LoginPage(),
+      '/select1': (context) => Select1Page(),
+      '/select2': (context) => Select2Page(),
+      '/time': (context) => CupertinoTimerPage(),
     },
   ));
+}
+
+// Custom Drawer 위젯
+class CustomDrawer extends StatelessWidget {
+  final String? username; // null 가능하도록 변경
+
+  CustomDrawer({this.username = ''}); // 기본값을 빈 문자열로 설정
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue, // 원하는 색으로 배경 설정
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    username != null && username!.isNotEmpty
+                        ? username![0]
+                        : '',
+                    style: TextStyle(fontSize: 40.0, color: Colors.blue),
+                  ),
+                ),
+                SizedBox(width: 16), // 이름과 아이콘 사이 간격
+                Text(
+                  username ?? 'Guest',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.arrow_back), // 뒤로 가기 아이콘
+            title: Text("이전 화면"), // 항목명
+            onTap: () {
+              Navigator.pop(context); // Drawer 닫기
+              Navigator.pop(context); // 이전 화면으로 돌아가기
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text("로그아웃"),
+            onTap: () {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/',
+                (Route<dynamic> route) => false, // 로그아웃 후 홈으로 이동
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class homepage extends StatelessWidget {
@@ -30,7 +96,9 @@ class homepage extends StatelessWidget {
   }
 }
 
-class loginpage extends StatelessWidget {
+class LoginPage extends StatelessWidget {
+  final TextEditingController _usernameController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,13 +121,12 @@ class loginpage extends StatelessWidget {
               Container(
                 margin: EdgeInsets.only(top: 100),
                 child: Icon(
-                  CupertinoIcons.person_crop_circle,
+                  Icons.person,
                   color: Color(0x9A7A7D7A),
                   size: 150,
                 ),
               ),
               Padding(
-                // padding: const EdgeInsets.all(8.0),
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Container(
                   width: double.infinity,
@@ -72,8 +139,9 @@ class loginpage extends StatelessWidget {
                     border: Border.all(color: Colors.black, width: 0.7),
                   ),
                   child: TextField(
+                    controller: _usernameController,
                     decoration: InputDecoration(
-                      labelText: "user name",
+                      labelText: "User Name",
                       contentPadding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     ),
@@ -81,18 +149,21 @@ class loginpage extends StatelessWidget {
                 ),
               ),
               Padding(
-                // padding: const EdgeInsets.all(8.0),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/select1');
+                    String username = _usernameController.text;
+                    Navigator.pushNamed(
+                      context,
+                      '/select1',
+                      arguments: username,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
-                    // backgroundColor: Color(0x9A7A7D7A).withOpacity(0.2),
                     backgroundColor: Color(0xFF89BE63).withOpacity(0.5),
                     foregroundColor: Color.fromRGBO(40, 40, 40, 0.604),
-                    minimumSize: Size(double.infinity, 50), // 버튼 크기
+                    minimumSize: Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
@@ -100,7 +171,7 @@ class loginpage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  child: Text("login"),
+                  child: Text("Login"),
                 ),
               ),
             ],
@@ -111,11 +182,15 @@ class loginpage extends StatelessWidget {
   }
 }
 
-class select1page extends StatelessWidget {
+class Select1Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final String username =
+        ModalRoute.of(context)!.settings.arguments as String;
+
     return Scaffold(
       appBar: AppBar(),
+      drawer: CustomDrawer(username: username),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -132,13 +207,21 @@ class select1page extends StatelessWidget {
                       BubbleButton(
                         text: '걷기',
                         onPressed: () {
-                          Navigator.pushNamed(context, '/select2');
+                          Navigator.pushNamed(
+                            context,
+                            '/select2',
+                            arguments: username, // username 전달
+                          );
                         },
                       ),
                       BubbleButton2(
                         text: '뛰기',
                         onPressed: () {
-                          Navigator.pushNamed(context, '/select2');
+                          Navigator.pushNamed(
+                            context,
+                            '/select2',
+                            arguments: username, // username 전달
+                          );
                         },
                       ),
                     ],
@@ -173,11 +256,15 @@ class select1page extends StatelessWidget {
   }
 }
 
-class select2page extends StatelessWidget {
+class Select2Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final String username =
+        ModalRoute.of(context)!.settings.arguments as String;
+
     return Scaffold(
       appBar: AppBar(),
+      drawer: CustomDrawer(username: username),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -193,11 +280,23 @@ class select2page extends StatelessWidget {
                     children: <Widget>[
                       BubbleButton(
                         text: '시간',
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/time',
+                            arguments: username, // username 전달
+                          );
+                        },
                       ),
                       BubbleButton2(
                         text: '거리',
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/time',
+                            arguments: username, // username 전달
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -364,5 +463,137 @@ class BubbleTailPainter2 extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
+  }
+}
+
+class CupertinoTimerPage extends StatefulWidget {
+  @override
+  _CupertinoTimerPageState createState() => _CupertinoTimerPageState();
+}
+
+class _CupertinoTimerPageState extends State<CupertinoTimerPage> {
+  Duration _selectedDuration = const Duration(minutes: 1); // 기본 선택 시간 (1분)
+  Duration _remainingTime = const Duration(); // 남은 시간
+  Timer? _timer; // 타이머 객체
+  bool _isRunning = false; // 타이머 실행 상태
+
+  // 타이머 시작 함수
+  void _startTimer() {
+    setState(() {
+      _remainingTime = _selectedDuration; // 선택된 시간으로 초기화
+      _isRunning = true;
+    });
+
+    _timer?.cancel(); // 기존 타이머 중지
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_remainingTime.inSeconds > 0) {
+          _remainingTime -= const Duration(seconds: 1);
+        } else {
+          _timer?.cancel();
+          _isRunning = false;
+          _showTimeUpDialog();
+        }
+      });
+    });
+  }
+
+  // 타이머 종료 다이얼로그
+  void _showTimeUpDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("타이머 종료"),
+        content: const Text("설정된 시간이 끝났습니다!"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // 타이머 해제
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("시간 선택")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!_isRunning)
+              ElevatedButton(
+                onPressed: () {
+                  _showCupertinoPicker(context);
+                },
+                child: const Text("시간 선택하기"),
+              ),
+            const SizedBox(height: 20),
+            Text(
+              _isRunning
+                  ? "남은 시간: ${_remainingTime.inHours}시간 ${_remainingTime.inMinutes.remainder(60)}분 ${_remainingTime.inSeconds.remainder(60)}초"
+                  : "선택된 시간: ${_selectedDuration.inHours}시간 ${_selectedDuration.inMinutes.remainder(60)}분",
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 20),
+            if (!_isRunning)
+              ElevatedButton(
+                onPressed: _selectedDuration.inSeconds > 0 ? _startTimer : null,
+                child: const Text("타이머 시작"),
+              ),
+            if (_isRunning)
+              ElevatedButton(
+                onPressed: () {
+                  _timer?.cancel();
+                  setState(() {
+                    _isRunning = false;
+                    _remainingTime = const Duration();
+                  });
+                },
+                child: const Text("타이머 중지"),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // iOS 스타일의 시간 선택 화면
+  void _showCupertinoPicker(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => Container(
+        height: 250,
+        color: Colors.white,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: CupertinoTimerPicker(
+                mode: CupertinoTimerPickerMode.hm, // 시와 분 선택
+                initialTimerDuration: _selectedDuration,
+                onTimerDurationChanged: (duration) {
+                  setState(() {
+                    _selectedDuration = duration; // 사용자가 선택한 시간 저장
+                  });
+                },
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("확인", style: TextStyle(fontSize: 18)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
