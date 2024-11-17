@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'dart:async';
+import 'package:comya_app/setpage.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -12,7 +12,8 @@ void main() {
       '/login': (context) => LoginPage(),
       '/select1': (context) => Select1Page(),
       '/select2': (context) => Select2Page(),
-      '/time': (context) => CupertinoTimerPage(),
+      '/time': (context) => SetPage(),
+      '/distance': (context) => SetPage2(),
     },
   ));
 }
@@ -102,17 +103,6 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          "LOGIN",
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFFAFCCA9),
-          ),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -293,7 +283,7 @@ class Select2Page extends StatelessWidget {
                         onPressed: () {
                           Navigator.pushNamed(
                             context,
-                            '/time',
+                            '/distance',
                             arguments: username, // username 전달
                           );
                         },
@@ -463,137 +453,5 @@ class BubbleTailPainter2 extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
-  }
-}
-
-class CupertinoTimerPage extends StatefulWidget {
-  @override
-  _CupertinoTimerPageState createState() => _CupertinoTimerPageState();
-}
-
-class _CupertinoTimerPageState extends State<CupertinoTimerPage> {
-  Duration _selectedDuration = const Duration(minutes: 1); // 기본 선택 시간 (1분)
-  Duration _remainingTime = const Duration(); // 남은 시간
-  Timer? _timer; // 타이머 객체
-  bool _isRunning = false; // 타이머 실행 상태
-
-  // 타이머 시작 함수
-  void _startTimer() {
-    setState(() {
-      _remainingTime = _selectedDuration; // 선택된 시간으로 초기화
-      _isRunning = true;
-    });
-
-    _timer?.cancel(); // 기존 타이머 중지
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_remainingTime.inSeconds > 0) {
-          _remainingTime -= const Duration(seconds: 1);
-        } else {
-          _timer?.cancel();
-          _isRunning = false;
-          _showTimeUpDialog();
-        }
-      });
-    });
-  }
-
-  // 타이머 종료 다이얼로그
-  void _showTimeUpDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("타이머 종료"),
-        content: const Text("설정된 시간이 끝났습니다!"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("확인"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel(); // 타이머 해제
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("시간 선택")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!_isRunning)
-              ElevatedButton(
-                onPressed: () {
-                  _showCupertinoPicker(context);
-                },
-                child: const Text("시간 선택하기"),
-              ),
-            const SizedBox(height: 20),
-            Text(
-              _isRunning
-                  ? "남은 시간: ${_remainingTime.inHours}시간 ${_remainingTime.inMinutes.remainder(60)}분 ${_remainingTime.inSeconds.remainder(60)}초"
-                  : "선택된 시간: ${_selectedDuration.inHours}시간 ${_selectedDuration.inMinutes.remainder(60)}분",
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 20),
-            if (!_isRunning)
-              ElevatedButton(
-                onPressed: _selectedDuration.inSeconds > 0 ? _startTimer : null,
-                child: const Text("타이머 시작"),
-              ),
-            if (_isRunning)
-              ElevatedButton(
-                onPressed: () {
-                  _timer?.cancel();
-                  setState(() {
-                    _isRunning = false;
-                    _remainingTime = const Duration();
-                  });
-                },
-                child: const Text("타이머 중지"),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // iOS 스타일의 시간 선택 화면
-  void _showCupertinoPicker(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => Container(
-        height: 250,
-        color: Colors.white,
-        child: Column(
-          children: [
-            SizedBox(
-              height: 200,
-              child: CupertinoTimerPicker(
-                mode: CupertinoTimerPickerMode.hm, // 시와 분 선택
-                initialTimerDuration: _selectedDuration,
-                onTimerDurationChanged: (duration) {
-                  setState(() {
-                    _selectedDuration = duration; // 사용자가 선택한 시간 저장
-                  });
-                },
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("확인", style: TextStyle(fontSize: 18)),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
