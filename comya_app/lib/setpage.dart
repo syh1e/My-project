@@ -14,6 +14,7 @@ class _HomePageState extends State<SetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       backgroundColor: Colors.grey[900],
       body: Center(
         // Center로 전체 Column 중앙 정렬
@@ -189,6 +190,7 @@ class _HomePageState2 extends State<SetPage2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       backgroundColor: Colors.grey[900],
       body: Center(
         child: Column(

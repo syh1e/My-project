@@ -91,7 +91,7 @@ class homepage extends StatelessWidget {
     });
     return Scaffold(
       body: Center(
-        child: Image.asset("loading.png"),
+        child: Image.asset("assets/images/loading.png"),
       ),
     );
   }
@@ -221,7 +221,7 @@ class Select1Page extends StatelessWidget {
               SizedBox(height: 20),
               Center(
                 child: Image.asset(
-                  'assets/running.png',
+                  'assets/images/running.png',
                   width: 500,
                   height: 250,
                 ),
@@ -295,7 +295,7 @@ class Select2Page extends StatelessWidget {
               SizedBox(height: 20),
               Center(
                 child: Image.asset(
-                  'assets/running.png',
+                  'assets/images/running.png',
                   width: 500,
                   height: 250,
                 ),
