@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:comya_app/setpage.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -18,6 +19,92 @@ void main() {
   ));
 }
 
+class WeeklyBarChart extends StatelessWidget {
+  const WeeklyBarChart({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BarChart(
+      BarChartData(
+        maxY: 10, // Y축 최대 값
+        barGroups: [
+          BarChartGroupData(
+            x: 0,
+            barRods: [BarChartRodData(toY: 5, color: Colors.blue)],
+          ),
+          BarChartGroupData(
+            x: 1,
+            barRods: [BarChartRodData(toY: 7, color: Colors.green)],
+          ),
+          BarChartGroupData(
+            x: 2,
+            barRods: [BarChartRodData(toY: 4, color: Colors.orange)],
+          ),
+          BarChartGroupData(
+            x: 3,
+            barRods: [BarChartRodData(toY: 6, color: Colors.purple)],
+          ),
+          BarChartGroupData(
+            x: 4,
+            barRods: [BarChartRodData(toY: 8, color: Colors.red)],
+          ),
+          BarChartGroupData(
+            x: 5,
+            barRods: [BarChartRodData(toY: 3, color: Colors.teal)],
+          ),
+          BarChartGroupData(
+            x: 6,
+            barRods: [BarChartRodData(toY: 9, color: Colors.amber)],
+          ),
+        ],
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40, // Y축 간격
+              getTitlesWidget: (value, meta) {
+                return Text(value.toInt().toString(),
+                    style: const TextStyle(fontSize: 12));
+              },
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                const style = TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                );
+                switch (value.toInt()) {
+                  case 0:
+                    return const Text('월', style: style);
+                  case 1:
+                    return const Text('화', style: style);
+                  case 2:
+                    return const Text('수', style: style);
+                  case 3:
+                    return const Text('목', style: style);
+                  case 4:
+                    return const Text('금', style: style);
+                  case 5:
+                    return const Text('토', style: style);
+                  case 6:
+                    return const Text('일', style: style);
+                  default:
+                    return const Text('', style: style);
+                }
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        gridData: FlGridData(show: true), // 그리드 라인 표시
+      ),
+    );
+  }
+}
+
 // Custom Drawer 위젯
 class CustomDrawer extends StatelessWidget {
   final String? username; // null 가능하도록 변경
@@ -32,7 +119,7 @@ class CustomDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue, // 원하는 색으로 배경 설정
+              color: Color(0xFF89BE63), // 원하는 색으로 배경 설정
             ),
             child: Row(
               children: [
@@ -42,7 +129,7 @@ class CustomDrawer extends StatelessWidget {
                     username != null && username!.isNotEmpty
                         ? username![0]
                         : '',
-                    style: TextStyle(fontSize: 40.0, color: Colors.blue),
+                    style: TextStyle(fontSize: 20.0, color: Color(0xFF89BE63)),
                   ),
                 ),
                 SizedBox(width: 16), // 이름과 아이콘 사이 간격
@@ -53,6 +140,69 @@ class CustomDrawer extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // "주 / 일" 버튼
+
+                const SizedBox(height: 20),
+                // "일일 평균" 텍스트
+                const Text(
+                  '일주일동안 총 함께한 시간 ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text(
+                      '1시간 15분',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '지난주 대비 ↓16%',
+                      style: TextStyle(color: Colors.red, fontSize: 16),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const SizedBox(
+                  height: 200,
+                  child: WeeklyBarChart(), // 막대그래프 추가
+                ),
+                const SizedBox(height: 20),
+                // "걷기/뛰기" 정보
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: const [
+                        Text(
+                          '걷기',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text('1시간 30분'),
+                      ],
+                    ),
+                    Column(
+                      children: const [
+                        Text(
+                          '뛰기',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text('30분'),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -247,6 +397,80 @@ class Select1Page extends StatelessWidget {
 }
 
 class Select2Page extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final String username =
+        ModalRoute.of(context)!.settings.arguments as String;
+
+    return Scaffold(
+      appBar: AppBar(),
+      drawer: CustomDrawer(username: username),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Container(
+                  margin: EdgeInsets.only(top: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      BubbleButton(
+                        text: '시간',
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/time',
+                            arguments: username, // username 전달
+                          );
+                        },
+                      ),
+                      BubbleButton2(
+                        text: '거리',
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/distance',
+                            arguments: username, // username 전달
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: Image.asset(
+                  'assets/images/running.png',
+                  width: 500,
+                  height: 250,
+                ),
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: Text(
+                  '시간/거리 중에 선택해주세요.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Select3Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String username =

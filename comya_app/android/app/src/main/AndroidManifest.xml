@@ -1,8 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <application
-        android:label="comya_app"
+        android:label="google_map_viewer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyDfRcxqWAvfg_qTl1lhS7y3ScFM36K836I"/>
+       
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
