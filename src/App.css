@@ -1,0 +1,158 @@
+.App {
+    text-align: center;
+}
+
+.header-image {
+    width: 100%;
+    height: auto;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 20px;
+}
+
+.pokemon-card {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 10px;
+    text-align: center;
+    background-color: #f9f9f9;
+
+}
+
+.black-box {
+    background-color: black;
+    display: flex;
+    justify-content: space-between; /* 좌우 공간을 최대한 벌림 */
+    align-items: center;
+    padding: 10px 20px;
+}
+
+/* 검색 입력창 스타일 */
+.search-input {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    width: 250px; /* 입력창 너비 */
+}
+
+/* 스위치 스타일 */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+/* 숨겨진 체크박스 */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* 슬라이더 스타일 */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffcafd;
+    border-radius: 50px;
+    transition: background-color 0.5s;
+}
+
+/* 슬라이더의 초기 상태 */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50px;
+    transition: transform 0.5s;
+}
+
+/* 체크박스를 체크했을 때 슬라이더의 색상과 위치 */
+.switch input:checked + .slider {
+    background-color: #b84fce;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(24px); /* 슬라이더의 이동 거리 */
+}
+
+.dark-mode {
+    background-color: black; /* 다크 배경 색상 */
+    color: white; /* 글자 색상 */
+}
+
+/* 화이트 모드 스타일 */
+.light-mode {
+    background-color: white; /* 화이트 배경 색상 */
+    color: black; /* 글자 색상 */
+}
+
+/* 다크 모드에서 포켓몬 카드 스타일 */
+.dark-mode .pokemon-card {
+    background-color: #444; /* 카드 배경 색상 다크 모드 */
+    border: 1px solid #555; /* 카드 테두리 색상 다크 모드 */
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.filter-options label {
+    margin-right: 7px;
+    margin-top: 7px;
+}
+
+/* 페이지네이션을 가로로 정렬하기 위한 스타일 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.pagination li {
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.pagination li a {
+    padding: 8px 12px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    color: #333;
+}
+
+.pagination li.active a {
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #4CAF50;
+}
+
+.splash-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+}
+
+.splash-image {
+    max-width: 300px;
+    width: 80%;
+}
