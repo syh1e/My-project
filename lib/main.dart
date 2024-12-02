@@ -6,6 +6,7 @@ import 'dart:convert';
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
+    theme: ThemeData(fontFamily: 'GmarketSansTTF'),
     title: "App Default",
     initialRoute: '/',
     routes: {
@@ -476,11 +477,12 @@ class _MonthlySummaryPageState extends State<MonthPage> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
-                      // 선택된 날짜에 해당하는 DetailPage로 이동
-                      Navigator.pushNamed(
+                      Navigator.push(
                         context,
-                        '/detail',
-                        arguments: selectedDay,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DetailPage(selectedDate: selectedDay),
+                        ),
                       );
                     },
                     calendarStyle: CalendarStyle(
@@ -527,26 +529,22 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  // 지출 기록 리스트
+  late DateTime _selectedDay;
   List<Map<String, String>> expenseRecords = [];
-  // 수입 기록 리스트
   List<Map<String, String>> incomeRecords = [];
-  // 지출 카테고리 리스트
   List<String> expenseCategories = [];
-  // 수입 카테고리 리스트
   List<String> incomeCategories = [];
 
   @override
   void initState() {
     super.initState();
-    _loadData(); // 데이터를 로드
+    _selectedDay = widget.selectedDate;
+    _loadData();
   }
 
-  // 데이터를 SharedPreferences에서 로드
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // 지출 기록 로드
     String? expenseData = prefs.getString('expenseRecords');
     if (expenseData != null) {
       List<dynamic> expenseList = jsonDecode(expenseData);
@@ -554,7 +552,6 @@ class _DetailPageState extends State<DetailPage> {
           expenseList.map((e) => Map<String, String>.from(e)).toList();
     }
 
-    // 수입 기록 로드
     String? incomeData = prefs.getString('incomeRecords');
     if (incomeData != null) {
       List<dynamic> incomeList = jsonDecode(incomeData);
@@ -562,26 +559,22 @@ class _DetailPageState extends State<DetailPage> {
           incomeList.map((e) => Map<String, String>.from(e)).toList();
     }
 
-    // 지출 카테고리 로드
     String? expenseCategoriesData = prefs.getString('expenseCategories');
     if (expenseCategoriesData != null) {
       expenseCategories = List<String>.from(jsonDecode(expenseCategoriesData));
     }
 
-    // 수입 카테고리 로드
     String? incomeCategoriesData = prefs.getString('incomeCategories');
     if (incomeCategoriesData != null) {
       incomeCategories = List<String>.from(jsonDecode(incomeCategoriesData));
     }
 
-    setState(() {}); // UI 갱신
+    setState(() {});
   }
 
-  // 데이터를 SharedPreferences에 저장
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // 데이터를 JSON 형식으로 저장
     prefs.setString('expenseRecords', jsonEncode(expenseRecords));
     prefs.setString('incomeRecords', jsonEncode(incomeRecords));
     prefs.setString('expenseCategories', jsonEncode(expenseCategories));
@@ -593,7 +586,7 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            '${widget.selectedDate.year}년 ${widget.selectedDate.month}월 ${widget.selectedDate.day}일 내역'),
+            '${_selectedDay.year}년 ${_selectedDay.month}월 ${_selectedDay.day}일 내역'),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: SingleChildScrollView(
@@ -601,14 +594,10 @@ class _DetailPageState extends State<DetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 지출 기록 섹션
             _buildSectionTitle('지출 기록', true),
             _buildRecordTable(expenseRecords),
             _buildAddButton(isExpense: true),
-
             SizedBox(height: 20),
-
-            // 수입 기록 섹션
             _buildSectionTitle('수입 기록', false),
             _buildRecordTable(incomeRecords),
             _buildAddButton(isExpense: false),
@@ -635,10 +624,14 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildRecordTable(List<Map<String, String>> records) {
+    final filteredRecords = records.where((record) {
+      final recordDate = DateTime.parse(record['date']!);
+      return isSameDay(recordDate, _selectedDay);
+    }).toList();
+
     return Table(
       border: TableBorder.all(color: Colors.grey),
       children: [
-        // 테이블 헤더
         TableRow(
           children: [
             _buildTableCell('카테고리', isHeader: true),
@@ -647,8 +640,7 @@ class _DetailPageState extends State<DetailPage> {
             _buildTableCell('삭제', isHeader: true),
           ],
         ),
-        // 테이블 데이터
-        ...records.map((record) {
+        ...filteredRecords.map((record) {
           return TableRow(
             children: [
               _buildTableCell(record['category'] ?? ''),
@@ -660,7 +652,7 @@ class _DetailPageState extends State<DetailPage> {
                   setState(() {
                     records.remove(record);
                   });
-                  _saveData(); // 삭제 후 데이터 저장
+                  _saveData();
                 },
               ),
             ],
@@ -747,6 +739,7 @@ class _DetailPageState extends State<DetailPage> {
                     'category': selectedCategory ?? '',
                     'content': content,
                     'amount': amount,
+                    'date': _selectedDay.toString(),
                   };
                   if (isExpense) {
                     expenseRecords.add(record);
@@ -754,7 +747,7 @@ class _DetailPageState extends State<DetailPage> {
                     incomeRecords.add(record);
                   }
                 });
-                _saveData(); // 추가 후 데이터 저장
+                _saveData();
                 Navigator.pop(context);
               },
               child: Text('추가'),
