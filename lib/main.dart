@@ -17,6 +17,10 @@ void main() {
       '/community': (context) => CommunityPage(),
       '/eco': (context) => EcoPage(),
       '/month': (context) => MonthPage(),
+      '/detail2': (context) => Detail(
+            records: [],
+            selectedMonth: '',
+          ),
     },
     onGenerateRoute: (settings) {
       if (settings.name == '/detail') {
@@ -433,6 +437,36 @@ class MonthPage extends StatefulWidget {
 class _MonthlySummaryPageState extends State<MonthPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  double totalIncome = 0.0;
+  double totalExpense = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 수입 내역과 지출 내역 불러오기
+    String? expenseData = prefs.getString('expenseRecords');
+    String? incomeData = prefs.getString('incomeRecords');
+
+    if (expenseData != null) {
+      List<dynamic> expenseList = jsonDecode(expenseData);
+      totalExpense =
+          expenseList.fold(0.0, (sum, e) => sum + (e['amount'] ?? 0.0));
+    }
+
+    if (incomeData != null) {
+      List<dynamic> incomeList = jsonDecode(incomeData);
+      totalIncome =
+          incomeList.fold(0.0, (sum, e) => sum + (e['amount'] ?? 0.0));
+    }
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -462,7 +496,7 @@ class _MonthlySummaryPageState extends State<MonthPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Text(
-                      '이번달 수입: 5,000,000원\n이번달 지출: 1,590,483원',
+                      '이번달 수입: ${totalIncome.toStringAsFixed(0)}원\n이번달 지출: ${totalExpense.toStringAsFixed(0)}원',
                       textAlign: TextAlign.center,
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -510,7 +544,7 @@ class _MonthlySummaryPageState extends State<MonthPage> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              // 소비 내역 보기 기능 추가
+              Navigator.pushNamed(context, '/detail2'); // 소비 내역 보기 기능 추가
             },
             child: Text('소비 내역 자세히 보기'),
           ),
@@ -520,6 +554,163 @@ class _MonthlySummaryPageState extends State<MonthPage> {
   }
 }
 
+// 소비 내역 자세히 보기
+class Detail extends StatefulWidget {
+  final List<Map<String, dynamic>> records; // 소비 내역
+  final String selectedMonth; // 선택한 달
+
+  Detail({required this.records, required this.selectedMonth});
+
+  @override
+  _DetailState createState() => _DetailState();
+}
+
+class _DetailState extends State<Detail> {
+  String? selectedCategory; // 선택된 카테고리
+  double totalAmount = 0.0; // 총 소비 금액
+  Map<String, double> categoryTotals = {}; // 카테고리별 총 금액
+
+  // 카테고리 색상 맵
+  final Map<String, Color> categoryColors = {
+    '식비': Colors.orange,
+    '쇼핑': Colors.green,
+    '이체': Colors.blue,
+    '기타': Colors.grey,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateTotals();
+  }
+
+  void _calculateTotals() {
+    // 전체 금액 및 카테고리별 합계 계산
+    double total = 0.0;
+    Map<String, double> tempCategoryTotals = {};
+
+    for (var record in widget.records) {
+      if (record['month'] == widget.selectedMonth) {
+        final category = record['category'];
+        final amount = record['amount'] ?? 0.0;
+
+        total += amount;
+
+        if (tempCategoryTotals.containsKey(category)) {
+          tempCategoryTotals[category] = tempCategoryTotals[category]! + amount;
+        } else {
+          tempCategoryTotals[category] = amount;
+        }
+      }
+    }
+
+    setState(() {
+      totalAmount = total;
+      categoryTotals = tempCategoryTotals;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 선택된 카테고리에 해당하는 내역 필터링
+    final filteredRecords = selectedCategory == null
+        ? []
+        : widget.records
+            .where((record) =>
+                record['month'] == widget.selectedMonth &&
+                record['category'] == selectedCategory)
+            .toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.selectedMonth} 소비 내역'),
+      ),
+      body: Column(
+        children: [
+          // 총 소비 금액 표시
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '${widget.selectedMonth} 총 소비 금액: ${totalAmount.toStringAsFixed(0)}원',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          // 카테고리별 비율 표시
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: categoryTotals.keys.map((category) {
+                final percentage =
+                    (categoryTotals[category]! / totalAmount) * 100;
+                return Flexible(
+                  flex: percentage.toInt(),
+                  child: Container(
+                    height: 20,
+                    color: categoryColors[category],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          // 카테고리 버튼
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: categoryTotals.keys.map((category) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedCategory = category;
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: selectedCategory == category
+                          ? categoryColors[category]
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: categoryColors[category]!),
+                    ),
+                    child: Text(
+                      category,
+                      style: TextStyle(
+                        color: selectedCategory == category
+                            ? Colors.white
+                            : categoryColors[category],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          // 선택된 카테고리 내역
+          Expanded(
+            child: selectedCategory == null
+                ? Center(child: Text('카테고리를 선택하세요.'))
+                : ListView.builder(
+                    itemCount: filteredRecords.length,
+                    itemBuilder: (context, index) {
+                      final record = filteredRecords[index];
+                      return ListTile(
+                        title: Text(record['description']),
+                        trailing: Text('${record['amount']}원'),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// 카테고리 관련
 class DetailPage extends StatefulWidget {
   final DateTime selectedDate;
 
@@ -664,15 +855,53 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildTableCell(String content, {bool isHeader = false}) {
+    // 색상과 카테고리 이름 분리
+    final parts = content.split('|');
+    final categoryName = parts[0];
+    final categoryColorName = parts.length > 1 ? parts[1] : null;
+
+    // 색상 맵
+    final colors = {
+      '빨강': Colors.red,
+      '주황': Colors.orange,
+      '노랑': Colors.yellow,
+      '초록': Colors.green,
+      '파랑': Colors.blue,
+      '남색': Colors.indigo,
+      '보라': Colors.purple,
+    };
+
+    // 색상 결정
+    final categoryColor = colors[categoryColorName] ?? Colors.grey;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Text(
-        content,
-        style: TextStyle(
-          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-          fontSize: 14,
-        ),
-      ),
+      child: isHeader
+          ? Text(
+              content,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            )
+          : Row(
+              children: [
+                if (categoryColorName != null)
+                  CircleAvatar(
+                    backgroundColor: categoryColor,
+                    radius: 8, // 원의 크기 조절
+                  ),
+                if (categoryColorName != null)
+                  SizedBox(width: 8), // 원과 텍스트 사이 간격
+                Expanded(
+                  child: Text(
+                    categoryName,
+                    style: TextStyle(fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -767,6 +996,18 @@ class _DetailPageState extends State<DetailPage> {
       context: context,
       builder: (context) {
         String newCategory = '';
+        String selectedColor = '빨강'; // 기본 색상
+
+        final colors = {
+          '빨강': Colors.red,
+          '주황': Colors.orange,
+          '노랑': Colors.yellow,
+          '초록': Colors.green,
+          '파랑': Colors.blue,
+          '남색': Colors.indigo,
+          '보라': Colors.purple,
+        };
+
         return AlertDialog(
           title: Text(isExpense ? '지출 카테고리 관리' : '수입 카테고리 관리'),
           content: Column(
@@ -799,6 +1040,28 @@ class _DetailPageState extends State<DetailPage> {
                   newCategory = value;
                 },
               ),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: '색상 선택'),
+                value: selectedColor,
+                items: colors.keys.map((colorName) {
+                  return DropdownMenuItem(
+                    value: colorName,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: colors[colorName],
+                          radius: 10,
+                        ),
+                        SizedBox(width: 8),
+                        Text(colorName),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  selectedColor = value!;
+                },
+              ),
             ],
           ),
           actions: [
@@ -810,10 +1073,11 @@ class _DetailPageState extends State<DetailPage> {
               onPressed: () {
                 setState(() {
                   if (newCategory.isNotEmpty) {
+                    final newCategoryWithColor = '$newCategory|$selectedColor';
                     if (isExpense) {
-                      expenseCategories.add(newCategory);
+                      expenseCategories.add(newCategoryWithColor);
                     } else {
-                      incomeCategories.add(newCategory);
+                      incomeCategories.add(newCategoryWithColor);
                     }
                   }
                 });
