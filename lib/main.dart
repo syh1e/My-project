@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
+import 'dart:math';
 
 void main() {
   runApp(MaterialApp(
@@ -21,6 +23,14 @@ void main() {
             records: [],
             selectedMonth: '',
           ),
+      '/weekgoal': (context) => WeekGoal(),
+      '/mypage': (context) => MyPage(),
+      '/card': (context) => cardPage(),
+      '/web': (context) => webPage(),
+      '/han': (context) => hanPage(),
+      '/food': (context) => foodPage(),
+      '/drink': (context) => drinkPage(),
+      '/color': (context) => colorPage(),
     },
     onGenerateRoute: (settings) {
       if (settings.name == '/detail') {
@@ -154,6 +164,16 @@ class LoginPage extends StatelessWidget {
 class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // 문구 목록
+    List<String> quotes = [
+      '오늘 한 푼이 내일의 백 푼',
+      '천 리 길도 한 걸음부터',
+      '작은 물방울도 바위를 뚫는다',
+      '시작이 반이다',
+    ];
+
+    String randomQuote = quotes[Random().nextInt(quotes.length)];
+
     return LayoutBuilder(
       builder: (context, constraints) {
         double screenWidth = constraints.maxWidth;
@@ -162,26 +182,53 @@ class MainPage extends StatelessWidget {
         return Column(
           children: [
             Container(
-              width: screenWidth, // 화면의 너비에 맞게 조정
-              height: screenHeight, // 화면의 높이에 맞게 조정
+              width: screenWidth,
+              height: screenHeight,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(color: Colors.white),
               child: Stack(
                 children: [
+                  // 기존 배경 및 컴포넌트
                   Positioned(
                     left: 0,
-                    top: screenHeight * 0.75, // 75% 위치로 조정
+                    top: screenHeight * 0.68,
                     child: Container(
                       width: screenWidth,
-                      height: screenHeight * 0.15, // 화면의 15% 높이
+                      height: screenHeight * 0.22,
                       decoration: BoxDecoration(color: Color(0xFFBCBCBC)),
                     ),
                   ),
+                  // 오른쪽 상단 아이콘들 추가
+                  Positioned(
+                    right: screenWidth * 0.05, // 화면 오른쪽 여백
+                    top: screenHeight * 0.08, // 화면 위쪽 여백 (기존 0.05에서 0.08로 변경)
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.calendar_today),
+                          color: Colors.black,
+                          iconSize: screenWidth * 0.08,
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/weekgoal');
+                          },
+                        ),
+                        SizedBox(width: screenWidth * 0.02), // 아이콘 간 간격
+                        IconButton(
+                          icon: Icon(Icons.account_circle),
+                          color: Colors.black,
+                          iconSize: screenWidth * 0.08,
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/mypage');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: EdgeInsets.only(
-                          bottom: screenHeight * 0.115), // 하단 여백을 화면 높이에 맞게 조정
+                      padding: EdgeInsets.only(bottom: screenHeight * 0.115),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -191,8 +238,8 @@ class MainPage extends StatelessWidget {
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFDDDDDD),
-                              fixedSize: Size(screenWidth * 0.25,
-                                  screenWidth * 0.25), // 버튼 크기를 화면 크기에 맞게 조정
+                              fixedSize:
+                                  Size(screenWidth * 0.25, screenWidth * 0.25),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -202,7 +249,7 @@ class MainPage extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: screenWidth * 0.05, // 글자 크기 비율로 조정
+                                fontSize: screenWidth * 0.05,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -255,169 +302,117 @@ class MainPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // 랜덤 문구
                   Positioned(
-                    left: screenWidth * 0.18,
-                    top: screenHeight * 0.93, // 텍스트 위치를 화면 크기에 맞게 조정
-                    child: Text(
-                      '티끌 모아 태산',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth * 0.1, // 글자 크기 비율로 조정
-                        fontWeight: FontWeight.w500,
-                        height: 0,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.77,
-                    top: screenHeight * 0.18,
-                    child: Text(
-                      '500,000',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth * 0.04, // 글자 크기 비율로 조정
-                        fontWeight: FontWeight.w500,
-                        height: 0,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.37,
-                    top: screenHeight * 0.075,
-                    child: Text(
-                      '금주 지출 목표',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth * 0.04,
-                        fontWeight: FontWeight.w500,
-                        height: 0,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.03,
-                    top: screenHeight * 0.66, // 위치를 상대적으로 조정
+                    left: screenWidth * 0.12, // 텍스트를 좌측으로 조금 이동
+                    bottom: 20,
                     child: Container(
-                      width: screenWidth * 0.3, // 크기를 화면에 맞게 조정
-                      height: screenHeight * 0.07, // 크기를 화면에 맞게 조정
-                      decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.05,
-                    top: screenHeight * 0.68,
-                    child: Text(
-                      '상태',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: screenWidth * 0.07,
-                        fontWeight: FontWeight.w500,
-                        height: 0,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.19,
-                    top: screenHeight * 0.67,
-                    child: Container(
-                      width: screenWidth * 0.12,
-                      height: screenWidth * 0.12,
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.79,
-                    top: screenHeight * 0.65,
-                    child: Container(
-                      width: screenWidth * 0.16,
-                      height: screenHeight * 0.08,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.67, vertical: 5.08),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.22,
-                    top: screenHeight * 0.22,
-                    child: Container(
-                      width: screenWidth * 0.56, // 크기를 화면에 맞게 조정
-                      height: screenHeight * 0.42, // 크기를 화면에 맞게 조정
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(
-                              "https://via.placeholder.com/220x357"),
-                          fit: BoxFit.fill,
+                      width: screenWidth * 0.76, // 길이를 늘려줌
+                      alignment: Alignment.center, // 텍스트를 가운데로 맞춤
+                      child: Text(
+                        randomQuote,
+                        maxLines: 1, // 두 줄이 되지 않도록 설정
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: screenWidth * 0.06, // 폰트 크기를 줄임
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: screenWidth * 0.17,
-                    top: screenHeight * 0.12,
-                    child: Container(
-                      width: screenWidth * 0.63, // 크기 비율로 조정
-                      height: screenHeight * 0.06, // 크기 비율로 조정
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                        borderRadius: BorderRadius.circular(7),
-                        border: Border.all(color: Colors.black, width: 3),
-                      ),
+                    left: screenWidth * 0.05, // 왼쪽 여백
+                    top: screenHeight * 0.05, // 위쪽 여백
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 퍼센트 그래프
+                        Stack(
+                          children: [
+                            // 그래프의 배경
+                            Container(
+                              width: screenWidth * 0.9, // 전체 막대 길이
+                              height: screenHeight * 0.02, // 막대 높이
+                              decoration: BoxDecoration(
+                                color: Color(0xFFE0E0E0), // 배경 색상 (연회색)
+                                borderRadius:
+                                    BorderRadius.circular(5), // 모서리 둥글게
+                              ),
+                            ),
+                            // 그래프의 진행도
+                            Container(
+                              width: screenWidth * 0.5, // 진행된 부분의 길이 (50% 예제)
+                              height: screenHeight * 0.02,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF76C7C0), // 진행된 부분의 색상
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: screenHeight * 0.01), // 그래프와 텍스트 간 간격
+                        // 텍스트 설명
+                        Text(
+                          '금주 지출 목표',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: screenWidth * 0.045, // 텍스트 크기
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '500,000',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: screenWidth * 0.04, // 금액 크기
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 캐릭터 이미지 추가
+                  Positioned(
+                    left: screenWidth * 0.35, // 화면 중앙에 맞추기 위해 수정
+                    top: screenHeight * 0.3, // 위에서 적당한 위치로 수정
+                    child: Image.asset(
+                      'assets/images/character.png', // 이미지 경로 수정
+                      width: screenWidth * 0.3, // 적절한 크기로 조정
+                      height: screenWidth * 0.3,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   Positioned(
-                    left: screenWidth * 0.2,
-                    top: screenHeight * 0.13,
+                    left: screenWidth * 0.03,
+                    top: screenHeight * 0.63,
                     child: Container(
-                      width: screenWidth * 0.25, // 크기 비율로 조정
-                      height: screenHeight * 0.04, // 크기 비율로 조정
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD9D9D9),
-                        borderRadius: BorderRadius.circular(5),
+                      width: screenWidth * 0.3,
+                      height: screenHeight * 0.07,
+                      decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Center(
+                        child: Text(
+                          '상태',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: screenWidth * 0.07,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  Positioned(
-                    left: screenWidth * 0.87,
-                    top: screenHeight * 0.12,
-                    child: Container(
-                      width: screenWidth * 0.07, // 크기 비율로 조정
-                      height: screenHeight * 0.07, // 크기 비율로 조정
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: screenWidth * 0.65,
-                    top: screenHeight * 0.67,
-                    child: Container(
-                      width: screenWidth * 0.08,
-                      height: screenWidth * 0.08, // 크기 비율로 조정
-                      padding: const EdgeInsets.all(7.62),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [],
-                      ),
-                    ),
+                  IconButton(
+                    icon: Icon(Icons.store,
+                        size: 30, color: Colors.black), // 상점 모양 아이콘
+                    onPressed: () {
+                      // 버튼 클릭 시 동작
+                      Navigator.pushNamed(context, '/food');
+                    },
+                    tooltip: '상점으로 이동', // 버튼 위에 커서를 올렸을 때 표시될 힌트
                   ),
                 ],
               ),
@@ -425,6 +420,793 @@ class MainPage extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class WeekGoal extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 393,
+          height: 852,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 50,
+                top: 442,
+                child: Container(
+                  width: 99,
+                  height: 25,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        left: 21.44,
+                        top: 4.29,
+                        child: Container(
+                          width: 74.27,
+                          height: 17.14,
+                          decoration: ShapeDecoration(
+                            color: Color(0xFFEEEEEE),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(20),
+                                bottomRight: Radius.circular(20),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 34.68,
+                        top: 6.66,
+                        child: SizedBox(
+                          width: 64.32,
+                          height: 13.57,
+                          child: Text(
+                            '20.000',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontFamily: 'Gmarket Sans TTF',
+                              fontWeight: FontWeight.w500,
+                              height: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 47,
+                top: 423,
+                child: Container(
+                  width: 238,
+                  height: 46,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        child: Container(
+                          width: 238,
+                          height: 46,
+                          decoration: ShapeDecoration(
+                            color: Color(0xFF93A5AD),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 8,
+                        top: 5,
+                        child: SizedBox(
+                          width: 230,
+                          height: 38,
+                          child: Text(
+                            '지난 주에 20,000원을 아껴서\n                       를 리워드로 받았어!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                              fontFamily: 'Gmarket Sans TTF',
+                              fontWeight: FontWeight.w500,
+                              height: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 284.59,
+                top: 464.61,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-2.59),
+                  child: Container(
+                    width: 30,
+                    height: 23,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFF93A5AD),
+                      shape: StarBorder.polygon(sides: 3),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 43,
+                top: 500,
+                child: Container(
+                  width: 54,
+                  height: 81,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage("https://via.placeholder.com/54x81"),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 590,
+                child: Container(
+                  width: 282,
+                  height: 77,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFC9DEE8),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 2, color: Color(0xFF98AAB2)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 305,
+                top: 639,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(width: 16, height: 18, child: Stack()),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 55,
+                top: 695,
+                child: Container(
+                  width: 282,
+                  height: 77,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFC9DEE8),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 2, color: Color(0xFF98AAB2)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 307,
+                top: 747,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(width: 16, height: 18, child: Stack()),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 135,
+                top: 612,
+                child: SizedBox(
+                  width: 92,
+                  height: 53,
+                  child: Text(
+                    '나이키위',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 23,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 147,
+                top: 713,
+                child: SizedBox(
+                  width: 68,
+                  height: 24,
+                  child: Text(
+                    '따뜻한 패딩',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 69,
+                top: 608,
+                child: Container(
+                  width: 59,
+                  height: 44,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(),
+                  child: FlutterLogo(),
+                ),
+              ),
+              Positioned(
+                left: 69,
+                top: 696,
+                child: Container(
+                  width: 66,
+                  height: 63,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(),
+                  child: FlutterLogo(),
+                ),
+              ),
+              Positioned(
+                left: 210,
+                top: 724,
+                child: SizedBox(
+                  width: 119,
+                  height: 24,
+                  child: Text(
+                    '\$350,000',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 23,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 222,
+                top: 614,
+                child: SizedBox(
+                  width: 148,
+                  height: 36,
+                  child: Text(
+                    '\$150,000',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 23,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 51,
+                top: 338,
+                child: SizedBox(
+                  width: 46,
+                  height: 19,
+                  child: Text(
+                    '식비',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w700,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 308,
+                top: 338,
+                child: SizedBox(
+                  width: 49,
+                  height: 17,
+                  child: Text(
+                    '기타',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w700,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 263,
+                top: 230,
+                child: Text(
+                  '500,000',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 290,
+                top: 395,
+                child: Text(
+                  '500,000',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 135,
+                top: 139,
+                child: Text(
+                  '금주 지출 목표',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 139,
+                top: 299,
+                child: Text(
+                  '지난 주 지출 내역\n',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 58,
+                top: 63,
+                child: SizedBox(
+                  width: 277,
+                  height: 48,
+                  child: Text(
+                    '금주 지출 목표',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 40,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 53,
+                top: 163,
+                child: Container(
+                  width: 288,
+                  height: 65,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage("https://via.placeholder.com/288x65"),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 132,
+                top: 181,
+                child: Container(
+                  width: 195,
+                  height: 32,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFD9D9D9),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(7)),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 66,
+                top: 181,
+                child: Container(
+                  width: 102,
+                  height: 32,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFFF3B30),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(7),
+                        bottomLeft: Radius.circular(7),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 333,
+                top: 228,
+                child: Container(height: 20.81, child: Stack()),
+              ),
+              Positioned(
+                left: 287,
+                top: 413,
+                child: Container(
+                  width: 46,
+                  height: 75,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage("https://via.placeholder.com/46x75"),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 134,
+                top: 565,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 30,
+                    height: 29,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFF93A5AD),
+                      shape: StarBorder.polygon(sides: 3),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 102,
+                top: 505,
+                child: Container(
+                  width: 238,
+                  height: 46,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        child: Container(
+                          width: 238,
+                          height: 46,
+                          decoration: ShapeDecoration(
+                            color: Color(0xFF93A5AD),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 5,
+                        top: 8,
+                        child: SizedBox(
+                          width: 230,
+                          height: 38,
+                          child: Text(
+                            '지출을 줄였다면, 살 수 있었던\n물건들을 알려줄게!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                              fontFamily: 'Gmarket Sans TTF',
+                              fontWeight: FontWeight.w500,
+                              height: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 323,
+                top: 556,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  padding: const EdgeInsets.only(
+                    top: 3.25,
+                    left: 3.19,
+                    right: 3.20,
+                    bottom: 3.25,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 15,
+                top: 12,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  padding: const EdgeInsets.only(
+                      top: 6, left: 4, right: 4, bottom: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Widget _buildGoalProgressBar() {
+  return Stack(
+    children: [
+      Container(
+        width: 300,
+        height: 32,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(7),
+        ),
+      ),
+      Container(
+        width: 120, // Progress
+        height: 32,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(7),
+            bottomLeft: Radius.circular(7),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildRewardCard() {
+  return Container(
+    padding: const EdgeInsets.all(10),
+    width: 350,
+    decoration: BoxDecoration(
+      color: const Color(0xFFC9DEE8),
+      border: Border.all(color: const Color(0xFF98AAB2), width: 2),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '지난 주에 20,000원을 아껴서\n"나이키위"를 리워드로 받았어!',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FlutterLogo(size: 50),
+            Text(
+              '\$150,000',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildExpensesList() {
+  return Column(
+    children: [
+      _buildExpenseItem('식비', '\$500,000', Colors.blue),
+      const SizedBox(height: 10),
+      _buildExpenseItem('기타', '\$500,000', Colors.orange),
+    ],
+  );
+}
+
+Widget _buildExpenseItem(String category, String amount, Color color) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        category,
+        style: TextStyle(fontSize: 18, color: color),
+      ),
+      Text(
+        amount,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+    ],
+  );
+}
+
+class MyPage extends StatefulWidget {
+  @override
+  _MyPageState createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  String _nickname = 'nickname';
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 393,
+          height: 852,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 27,
+                top: 242,
+                child: Container(
+                  width: 333,
+                  height: 578,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFEEEEEE),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              // 중간 생략...
+              Positioned(
+                left: 156,
+                top: 131,
+                child: Container(
+                  width: 178,
+                  height: 32,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFBCBCBC),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 1),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 3,
+                        offset: Offset(0, 5),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // 닉네임 텍스트
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          _nickname,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontFamily: 'Gmarket Sans TTF',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      // 수정 아이콘
+                      IconButton(
+                        icon: Icon(Icons.edit, size: 18, color: Colors.black),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              TextEditingController nicknameController =
+                                  TextEditingController(text: _nickname);
+                              return AlertDialog(
+                                title: Text('닉네임 수정'),
+                                content: TextField(
+                                  controller: nicknameController,
+                                  decoration:
+                                      InputDecoration(hintText: '새 닉네임 입력'),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    },
+                                    child: Text('취소'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _nickname = nicknameController.text;
+                                      });
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    },
+                                    child: Text('저장'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1096,13 +1878,2475 @@ class _DetailPageState extends State<DetailPage> {
 class EcoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column();
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        '경제 지식',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/eco');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color.fromARGB(255, 255, 255, 255)),
+                      child: const Text(
+                        "동영상", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/card');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "카드뉴스", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/web');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "웹툰", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 251,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/han');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "한은소식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 5; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 139.13,
+                                    height: 79,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/image${i + 1}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 30,
+                                  child: Container(
+                                    width: 100,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/image${i + 6}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 90,
+                                  child: Container(
+                                    width: 100,
+                                    height: 18,
+                                    decoration: ShapeDecoration(
+                                      color: Color(0xFFD9D9D9),
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 2, color: Color(0xFF93A5AD)),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 205,
+                                  top: 90,
+                                  child: SizedBox(
+                                    width: 54,
+                                    height: 15,
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        final Uri url = Uri.parse(
+                                            'https://www.bok.or.kr/portal/bbs/B0000535/view.do?nttId=10087964&searchCnd=1&searchKwd=&pageUnit=12&depth=201151&pageIndex=2&menuNo=201721&oldMenuNo=201151&programType=multiCont');
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url,
+                                              mode: LaunchMode
+                                                  .externalApplication);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                      child: Text(
+                                        '동영상 보기',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class cardPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        '경제 지식',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/eco');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "동영상", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/card');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Colors.white),
+                      child: const Text(
+                        "카드뉴스", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/web');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "웹툰", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 251,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/han');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "한은소식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 6; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 139.13,
+                                    height: 79,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/${i * 2 + 1}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 30,
+                                  child: Container(
+                                    width: 100,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/${2 * (i + 1)}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 90,
+                                  child: Container(
+                                    width: 100,
+                                    height: 18,
+                                    decoration: ShapeDecoration(
+                                      color: Color(0xFFD9D9D9),
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 2, color: Color(0xFF93A5AD)),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 200,
+                                  top: 90,
+                                  child: SizedBox(
+                                    width: 70,
+                                    height: 15,
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        final Uri url = Uri.parse(
+                                            'https://www.bok.or.kr/portal/bbs/B0000365/view.do?nttId=10088163&searchCnd=1&searchKwd=&depth2=201214&date=&sdate=&edate=&sort=1&pageUnit=12&depth=201214&pageIndex=1&menuNo=201138&oldMenuNo=201151&programType=multiCont');
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url,
+                                              mode: LaunchMode
+                                                  .externalApplication);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                      child: Text(
+                                        '카드뉴스 보기',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class webPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        '경제 지식',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/eco');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "동영상", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/card');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "카드뉴스", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/web');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Colors.white),
+                      child: const Text(
+                        "웹툰", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 251,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/han');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "한은소식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 8; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 139.13,
+                                    height: 79,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/img${i + 1}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 30,
+                                  child: Container(
+                                    width: 100,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/img${i + 9}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 90,
+                                  child: Container(
+                                    width: 100,
+                                    height: 18,
+                                    decoration: ShapeDecoration(
+                                      color: Color(0xFFD9D9D9),
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 2, color: Color(0xFF93A5AD)),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 205,
+                                  top: 90,
+                                  child: SizedBox(
+                                    width: 54,
+                                    height: 15,
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        final Uri url = Uri.parse(
+                                            'https://www.bok.or.kr/portal/bbs/B0000320/view.do?nttId=10058718&searchCnd=1&searchKwd=&depth2=201304&date=&sdate=&edate=&sort=1&pageUnit=12&depth=201304&pageIndex=1&menuNo=201305&oldMenuNo=201151&programType=multiCont');
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url,
+                                              mode: LaunchMode
+                                                  .externalApplication);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                      child: Text(
+                                        '웹툰 보기',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class hanPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        '경제 지식',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/eco');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "동영상", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/card');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "카드뉴스", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/web');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "웹툰", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 251,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/han');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Colors.white),
+                      child: const Text(
+                        "한은소식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 6; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 139.13,
+                                    height: 79,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/han${i + 1}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 30,
+                                  child: Container(
+                                    width: 100,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/han${i + 7}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 180,
+                                  top: 90,
+                                  child: Container(
+                                    width: 100,
+                                    height: 18,
+                                    decoration: ShapeDecoration(
+                                      color: Color(0xFFD9D9D9),
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 2, color: Color(0xFF93A5AD)),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 200,
+                                  top: 90,
+                                  child: SizedBox(
+                                    width: 70,
+                                    height: 15,
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        final Uri url = Uri.parse(
+                                            'https://www.bok.or.kr/portal/bbs/B0000204/view.do?nttId=10082489&searchCnd=1&searchKwd=&depth2=200042&date=&sdate=&edate=&sort=1&pageUnit=12&depth=200042&pageIndex=1&menuNo=200042&oldMenuNo=201151&programType=multiCont');
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url,
+                                              mode: LaunchMode
+                                                  .externalApplication);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                      child: Text(
+                                        '한은소식 보기',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
 class CommunityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column();
+    return Column(
+      children: [
+        Container(
+          width: 393,
+          height: 852,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(color: Colors.white),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: 0,
+                child: Container(
+                  width: 393,
+                  height: 852,
+                  decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                ),
+              ),
+              Positioned(
+                left: 120,
+                top: 63,
+                child: Text(
+                  '커뮤니티',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 40,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 27,
+                top: 122,
+                child: Container(
+                  width: 340,
+                  height: 697,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 27,
+                top: 122,
+                child: Container(
+                  width: 340,
+                  height: 697,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 149,
+                child: Container(
+                  width: 286,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF93A5AD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 331,
+                child: Container(
+                  width: 286,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF93A5AD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 240,
+                child: Container(
+                  width: 286,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF93A5AD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 240,
+                child: Container(
+                  width: 286,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF93A5AD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 513,
+                child: Container(
+                  width: 286,
+                  height: 108,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF93A5AD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 422,
+                child: Container(
+                  width: 286,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFBCBCBC),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 54,
+                top: 656,
+                child: Container(
+                  width: 286,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFBCBCBC),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 89,
+                top: 225,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 40,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFF93A5AD),
+                      shape: StarBorder.polygon(sides: 3),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 89,
+                top: 316,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 40,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFF93A5AD),
+                      shape: StarBorder.polygon(sides: 3),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 89,
+                top: 407,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 40,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFF93A5AD),
+                      shape: StarBorder.polygon(sides: 3),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 89,
+                top: 641,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 40,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFF93A5AD),
+                      shape: StarBorder.polygon(sides: 3),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 300,
+                top: 498,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 40,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFFBCBCBC),
+                      shape: StarBorder.polygon(
+                        side: BorderSide(width: 2, color: Color(0xFFBCBCBC)),
+                        sides: 3,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 300,
+                top: 732,
+                child: Transform(
+                  transform: Matrix4.identity()
+                    ..translate(0.0, 0.0)
+                    ..rotateZ(-1.57),
+                  child: Container(
+                    width: 40,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFFBCBCBC),
+                      shape: StarBorder.polygon(
+                        side: BorderSide(width: 2, color: Color(0xFFBCBCBC)),
+                        sides: 3,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 29,
+                top: 740,
+                child: Container(
+                  width: 338,
+                  height: 77,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFD9D9D9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 46,
+                top: 756,
+                child: Opacity(
+                  opacity: 0.20,
+                  child: Container(
+                    width: 254,
+                    height: 40,
+                    decoration: ShapeDecoration(
+                      color: Color(0xFFD9D9D9),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(width: 4),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 307,
+                top: 756,
+                child: Container(
+                  width: 47,
+                  height: 36,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFFD9D9D9),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(width: 2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 313,
+                top: 762,
+                child: SizedBox(
+                  width: 39,
+                  height: 23,
+                  child: Text(
+                    '전송',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w400,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 61,
+                top: 673,
+                child: Text(
+                  '주식 잘 아시는 분 있으실까요??',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 19,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 64,
+                top: 428,
+                child: SizedBox(
+                  width: 264,
+                  height: 53,
+                  child: Text(
+                    '오늘도 화이팅! 다같이 절약합시당!',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 64,
+                top: 524,
+                child: SizedBox(
+                  width: 264,
+                  height: 97,
+                  child: Text(
+                    '안녕하세요 이번에 처음 들어왔는데 잘부탁드려용 요즘 너무 과소비해서... 다음달엔 줄이도록 노력해보겠습니다!!',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 61,
+                top: 338,
+                child: SizedBox(
+                  width: 283,
+                  height: 52,
+                  child: Text(
+                    '저 이번 달에 평소보다 20만원이나 줄였어요!',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 71,
+                top: 149,
+                child: Text(
+                  '저 이번 달에 평소보다 20만원이나 줄였어요!',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 19,
+                    fontFamily: 'Gmarket Sans TTF',
+                    fontWeight: FontWeight.w500,
+                    height: 0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 71,
+                top: 253,
+                child: SizedBox(
+                  width: 283,
+                  height: 52,
+                  child: Text(
+                    '휴... 전 30만원이나 더썼네요... \n',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 305,
+                top: 188,
+                child: SizedBox(
+                  width: 30,
+                  height: 21,
+                  child: Text(
+                    '신고',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 15,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 304,
+                top: 279,
+                child: SizedBox(
+                  width: 30,
+                  height: 21,
+                  child: Text(
+                    '신고',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 15,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 307,
+                top: 694,
+                child: SizedBox(
+                  width: 30,
+                  height: 21,
+                  child: Text(
+                    '신고',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 15,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 304,
+                top: 461,
+                child: SizedBox(
+                  width: 30,
+                  height: 21,
+                  child: Text(
+                    '신고',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 15,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 306,
+                top: 603,
+                child: SizedBox(
+                  width: 30,
+                  height: 21,
+                  child: Text(
+                    '신고',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 15,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 306,
+                top: 369,
+                child: SizedBox(
+                  width: 30,
+                  height: 21,
+                  child: Text(
+                    '신고',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 15,
+                      fontFamily: 'Gmarket Sans TTF',
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 15,
+                top: 12,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  padding: const EdgeInsets.only(
+                      top: 6, left: 4, right: 4, bottom: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class foodPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        'SHOP',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/food');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color.fromARGB(255, 255, 255, 255)),
+                      child: const Text(
+                        "음식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/drink');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "음료", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/color');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "색변경", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 5; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/food${i + 1}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 110,
+                                  top: 50,
+                                  child: SizedBox(
+                                    width: 70,
+                                    height: 70,
+                                    child: Text(
+                                      '키위',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 185,
+                                  top: 50,
+                                  child: SizedBox(
+                                    width: 150,
+                                    height: 70,
+                                    child: Text(
+                                      '\$1,500',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class drinkPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        'SHOP',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/food');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "음식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/drink');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Colors.white),
+                      child: const Text(
+                        "음료", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/color');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "색변경", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 6; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/images/drink${i + 1}.png'), // 로컬 이미지 불러오기
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 110,
+                                  top: 50,
+                                  child: SizedBox(
+                                    width: 70,
+                                    height: 70,
+                                    child: Text(
+                                      '물',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 185,
+                                  top: 50,
+                                  child: SizedBox(
+                                    width: 150,
+                                    height: 70,
+                                    child: Text(
+                                      '\$1,000',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class colorPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: 393,
+              height: 852,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 1.0,
+                      height: MediaQuery.of(context).size.height * 1.0,
+                      decoration: BoxDecoration(color: Color(0xFF93A5AD)),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter, // 상단 중앙 정렬
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      child: Text(
+                        'SHOP',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontFamily: 'Gmarket Sans TTF',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 15,
+                    top: 40,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
+                        onPressed: () {
+                          Navigator.pop(context); // 뒤로 가기 동작
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 44,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/food');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "음식", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 113,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/drink');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Color(0xFF93A5AD)),
+                      child: const Text(
+                        "음료", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 182,
+                    top: 117,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/color');
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(72, 72),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 3,
+                              color: Color(0xFFEEEEEE),
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          backgroundColor: Colors.white),
+                      child: const Text(
+                        "색변경", // 버튼 텍스트
+                        style: TextStyle(
+                          color: Colors.black, // 텍스트 색상
+                          fontSize: 14, // 텍스트 크기
+                          fontWeight: FontWeight.bold, // 텍스트 두께
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 27,
+                    top: 186,
+                    child: Container(
+                      width: 340,
+                      height: 644,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Color(0xFF93A5AD)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: ListView(
+                        children: [
+                          // 동영상 항목 리스트 (중복된 구조로 반복)
+                          for (var i = 0; i < 8; i++) ...[
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 294,
+                                  height: 111,
+                                  decoration: ShapeDecoration(
+                                    color: Color(0x00D9D9D9),
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 2, color: Color(0xFF93A5AD)),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 20,
+                                  top: 30,
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: ShapeDecoration(
+                                      color: Colors.red,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 110,
+                                  top: 50,
+                                  child: SizedBox(
+                                    width: 70,
+                                    height: 70,
+                                    child: Text(
+                                      '빨강',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 185,
+                                  top: 50,
+                                  child: SizedBox(
+                                    width: 150,
+                                    height: 70,
+                                    child: Text(
+                                      '\$1,000',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
