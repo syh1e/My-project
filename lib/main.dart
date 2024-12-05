@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -3646,13 +3647,16 @@ class CommunityPage extends StatelessWidget {
 class foodPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              width: 393,
-              height: 852,
+              width: screenWidth,
+              height: screenHeight,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(color: Colors.white),
               child: Stack(
@@ -3661,20 +3665,21 @@ class foodPage extends StatelessWidget {
                     left: 0,
                     top: 0,
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 1.0,
-                      height: MediaQuery.of(context).size.height * 1.0,
+                      width: screenWidth,
+                      height: screenHeight,
                       decoration: BoxDecoration(color: Color(0xFF93A5AD)),
                     ),
                   ),
                   Align(
                     alignment: Alignment.topCenter, // 상단 중앙 정렬
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      padding:
+                          EdgeInsets.only(top: screenHeight * 0.07), // 상단 여백 조정
                       child: Text(
                         'SHOP',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 35,
+                          fontSize: screenHeight * 0.04,
                           fontFamily: 'Gmarket Sans TTF',
                           fontWeight: FontWeight.w500,
                         ),
@@ -3682,12 +3687,12 @@ class foodPage extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 15,
-                    top: 40,
+                    left: screenWidth * 0.04,
+                    top: screenHeight * 0.05,
                     child: Container(
-                      width: 48,
-                      height: 48,
-                      padding: const EdgeInsets.all(8),
+                      width: screenWidth * 0.12,
+                      height: screenWidth * 0.12,
+                      padding: EdgeInsets.all(screenWidth * 0.02),
                       child: IconButton(
                         icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
                         onPressed: () {
@@ -3697,101 +3702,104 @@ class foodPage extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 44,
-                    top: 117,
+                    left: screenWidth * 0.11,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/food');
+                        Navigator.popAndPushNamed(context, '/food');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
-                            side: const BorderSide(
+                            side: BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color.fromARGB(255, 255, 255, 255)),
-                      child: const Text(
+                      child: Text(
                         "음식", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 113,
-                    top: 117,
+                    left: screenWidth * 0.28,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/drink');
+                        Navigator.popAndPushNamed(context, '/drink');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color(0xFF93A5AD)),
-                      child: const Text(
+                      child: Text(
                         "음료", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 182,
-                    top: 117,
+                    left: screenWidth * 0.45,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/color');
+                        Navigator.popAndPushNamed(context, '/color');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color(0xFF93A5AD)),
-                      child: const Text(
+                      child: Text(
                         "색변경", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 27,
-                    top: 186,
+                    left: screenWidth * 0.07,
+                    top: screenHeight * 0.21,
                     child: Container(
-                      width: 340,
-                      height: 644,
+                      width: screenWidth * 0.86,
+                      height: screenHeight * 0.75,
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -3806,9 +3814,9 @@ class foodPage extends StatelessWidget {
                             Stack(
                               children: [
                                 Container(
-                                  margin: EdgeInsets.all(10),
-                                  width: 294,
-                                  height: 111,
+                                  margin: EdgeInsets.all(screenWidth * 0.03),
+                                  width: screenWidth * 0.77,
+                                  height: screenHeight * 0.13,
                                   decoration: ShapeDecoration(
                                     color: Color(0x00D9D9D9),
                                     shape: RoundedRectangleBorder(
@@ -3819,11 +3827,11 @@ class foodPage extends StatelessWidget {
                                   ),
                                 ),
                                 Positioned(
-                                  left: 20,
-                                  top: 30,
+                                  left: screenWidth * 0.05,
+                                  top: screenHeight * 0.04,
                                   child: Container(
-                                    width: 70,
-                                    height: 70,
+                                    width: screenWidth * 0.22,
+                                    height: screenHeight * 0.1,
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
                                         image: AssetImage(
@@ -3834,32 +3842,74 @@ class foodPage extends StatelessWidget {
                                   ),
                                 ),
                                 Positioned(
-                                  left: 110,
-                                  top: 50,
+                                  left: screenWidth * 0.28,
+                                  top: screenHeight * 0.035,
                                   child: SizedBox(
-                                    width: 70,
-                                    height: 70,
-                                    child: Text(
-                                      '키위',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w500,
+                                    width: screenWidth * 0.2,
+                                    height: screenHeight * 0.1,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        // 팝업창 표시
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('나 키위 머것따'), // 팝업창 제목
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize
+                                                    .min, // 콘텐츠 크기를 내용에 맞게
+                                                children: [
+                                                  Image.asset(
+                                                    'assets/images/character_1.png', // 로컬 이미지 경로
+                                                    width: 100, // 이미지 너비
+                                                    height: 185, // 이미지 높이
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  SizedBox(
+                                                      height:
+                                                          10), // 이미지와 텍스트 사이 간격
+                                                  Text('움냠냠냠냠냠우걱우걱'), // 팝업창 내용
+                                                ],
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // 팝업창 닫기
+                                                  },
+                                                  child: Text('닫기'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.zero, // 버튼 내부 여백 제거
+                                      ),
+                                      child: Text(
+                                        '키위',
+                                        style: TextStyle(
+                                          color: Colors.black, // 텍스트 색상
+                                          fontSize:
+                                              screenHeight * 0.05, // 텍스트 크기
+                                          fontWeight: FontWeight.w500, // 텍스트 두께
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  left: 185,
-                                  top: 50,
+                                  left: screenWidth * 0.5,
+                                  top: screenHeight * 0.05,
                                   child: SizedBox(
-                                    width: 150,
-                                    height: 70,
+                                    width: screenWidth * 0.35,
+                                    height: screenHeight * 0.35,
                                     child: Text(
                                       '\$1,500',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 30,
+                                        fontSize: screenHeight * 0.05,
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
@@ -3885,13 +3935,16 @@ class foodPage extends StatelessWidget {
 class drinkPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              width: 393,
-              height: 852,
+              width: screenWidth,
+              height: screenHeight,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(color: Colors.white),
               child: Stack(
@@ -3900,20 +3953,21 @@ class drinkPage extends StatelessWidget {
                     left: 0,
                     top: 0,
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 1.0,
-                      height: MediaQuery.of(context).size.height * 1.0,
+                      width: screenWidth,
+                      height: screenHeight,
                       decoration: BoxDecoration(color: Color(0xFF93A5AD)),
                     ),
                   ),
                   Align(
                     alignment: Alignment.topCenter, // 상단 중앙 정렬
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      padding:
+                          EdgeInsets.only(top: screenHeight * 0.07), // 상단 여백 조정
                       child: Text(
                         'SHOP',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 35,
+                          fontSize: screenHeight * 0.04,
                           fontFamily: 'Gmarket Sans TTF',
                           fontWeight: FontWeight.w500,
                         ),
@@ -3921,12 +3975,12 @@ class drinkPage extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 15,
-                    top: 40,
+                    left: screenWidth * 0.04,
+                    top: screenHeight * 0.05,
                     child: Container(
-                      width: 48,
-                      height: 48,
-                      padding: const EdgeInsets.all(8),
+                      width: screenWidth * 0.12,
+                      height: screenWidth * 0.12,
+                      padding: EdgeInsets.all(screenWidth * 0.02),
                       child: IconButton(
                         icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
                         onPressed: () {
@@ -3936,101 +3990,104 @@ class drinkPage extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 44,
-                    top: 117,
+                    left: screenWidth * 0.11,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/food');
+                        Navigator.popAndPushNamed(context, '/food');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
-                            side: const BorderSide(
+                            side: BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color(0xFF93A5AD)),
-                      child: const Text(
+                      child: Text(
                         "음식", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 113,
-                    top: 117,
+                    left: screenWidth * 0.28,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/drink');
+                        Navigator.popAndPushNamed(context, '/drink');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Colors.white),
-                      child: const Text(
+                      child: Text(
                         "음료", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 182,
-                    top: 117,
+                    left: screenWidth * 0.45,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/color');
+                        Navigator.popAndPushNamed(context, '/color');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color(0xFF93A5AD)),
-                      child: const Text(
+                      child: Text(
                         "색변경", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 27,
-                    top: 186,
+                    left: screenWidth * 0.07,
+                    top: screenHeight * 0.21,
                     child: Container(
-                      width: 340,
-                      height: 644,
+                      width: screenWidth * 0.86,
+                      height: screenHeight * 0.75,
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -4045,9 +4102,9 @@ class drinkPage extends StatelessWidget {
                             Stack(
                               children: [
                                 Container(
-                                  margin: EdgeInsets.all(10),
-                                  width: 294,
-                                  height: 111,
+                                  margin: EdgeInsets.all(screenWidth * 0.03),
+                                  width: screenWidth * 0.77,
+                                  height: screenHeight * 0.13,
                                   decoration: ShapeDecoration(
                                     color: Color(0x00D9D9D9),
                                     shape: RoundedRectangleBorder(
@@ -4058,11 +4115,11 @@ class drinkPage extends StatelessWidget {
                                   ),
                                 ),
                                 Positioned(
-                                  left: 20,
-                                  top: 30,
+                                  left: screenWidth * 0.05,
+                                  top: screenHeight * 0.04,
                                   child: Container(
-                                    width: 70,
-                                    height: 70,
+                                    width: screenWidth * 0.22,
+                                    height: screenHeight * 0.1,
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
                                         image: AssetImage(
@@ -4073,32 +4130,42 @@ class drinkPage extends StatelessWidget {
                                   ),
                                 ),
                                 Positioned(
-                                  left: 110,
-                                  top: 50,
+                                  left: screenWidth * 0.28,
+                                  top: screenHeight * 0.035,
                                   child: SizedBox(
-                                    width: 70,
-                                    height: 70,
-                                    child: Text(
-                                      '물',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w500,
+                                    width: screenWidth * 0.2,
+                                    height: screenHeight * 0.1,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        // 버튼 클릭 시 실행할 동작
+                                        print("물 버튼이 클릭되었습니다.");
+                                      },
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.zero, // 버튼 내부 여백 제거
+                                      ),
+                                      child: Text(
+                                        '물',
+                                        style: TextStyle(
+                                          color: Colors.black, // 텍스트 색상
+                                          fontSize:
+                                              screenHeight * 0.05, // 텍스트 크기
+                                          fontWeight: FontWeight.w500, // 텍스트 두께
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  left: 185,
-                                  top: 50,
+                                  left: screenWidth * 0.5,
+                                  top: screenHeight * 0.05,
                                   child: SizedBox(
-                                    width: 150,
-                                    height: 70,
+                                    width: screenWidth * 0.35,
+                                    height: screenHeight * 0.35,
                                     child: Text(
                                       '\$1,000',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 30,
+                                        fontSize: screenHeight * 0.05,
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
@@ -4124,13 +4191,16 @@ class drinkPage extends StatelessWidget {
 class colorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              width: 393,
-              height: 852,
+              width: screenWidth,
+              height: screenHeight,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(color: Colors.white),
               child: Stack(
@@ -4139,20 +4209,21 @@ class colorPage extends StatelessWidget {
                     left: 0,
                     top: 0,
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 1.0,
-                      height: MediaQuery.of(context).size.height * 1.0,
+                      width: screenWidth,
+                      height: screenHeight,
                       decoration: BoxDecoration(color: Color(0xFF93A5AD)),
                     ),
                   ),
                   Align(
                     alignment: Alignment.topCenter, // 상단 중앙 정렬
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 59), // 상단 여백 조정
+                      padding:
+                          EdgeInsets.only(top: screenHeight * 0.07), // 상단 여백 조정
                       child: Text(
                         'SHOP',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 35,
+                          fontSize: screenHeight * 0.04,
                           fontFamily: 'Gmarket Sans TTF',
                           fontWeight: FontWeight.w500,
                         ),
@@ -4160,12 +4231,12 @@ class colorPage extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 15,
-                    top: 40,
+                    left: screenWidth * 0.04,
+                    top: screenHeight * 0.05,
                     child: Container(
-                      width: 48,
-                      height: 48,
-                      padding: const EdgeInsets.all(8),
+                      width: screenWidth * 0.12,
+                      height: screenWidth * 0.12,
+                      padding: EdgeInsets.all(screenWidth * 0.02),
                       child: IconButton(
                         icon: Icon(Icons.arrow_back), // 뒤로 가기 화살표 아이콘
                         onPressed: () {
@@ -4175,101 +4246,104 @@ class colorPage extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 44,
-                    top: 117,
+                    left: screenWidth * 0.11,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/food');
+                        Navigator.popAndPushNamed(context, '/food');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
-                            side: const BorderSide(
+                            side: BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color(0xFF93A5AD)),
-                      child: const Text(
+                      child: Text(
                         "음식", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 113,
-                    top: 117,
+                    left: screenWidth * 0.28,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/drink');
+                        Navigator.popAndPushNamed(context, '/drink');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Color(0xFF93A5AD)),
-                      child: const Text(
+                      child: Text(
                         "음료", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 182,
-                    top: 117,
+                    left: screenWidth * 0.45,
+                    top: screenHeight * 0.14,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/color');
+                        Navigator.popAndPushNamed(context, '/color');
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(72, 72),
+                          fixedSize:
+                              Size(screenWidth * 0.18, screenHeight * 0.09),
                           shape: RoundedRectangleBorder(
                             side: const BorderSide(
                               width: 3,
                               color: Color(0xFFEEEEEE),
                             ),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(screenWidth * 0.06),
+                              topRight: Radius.circular(screenWidth * 0.06),
                             ),
                           ),
                           backgroundColor: Colors.white),
-                      child: const Text(
+                      child: Text(
                         "색변경", // 버튼 텍스트
                         style: TextStyle(
                           color: Colors.black, // 텍스트 색상
-                          fontSize: 14, // 텍스트 크기
+                          fontSize: screenHeight * 0.015, // 텍스트 크기
                           fontWeight: FontWeight.bold, // 텍스트 두께
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 27,
-                    top: 186,
+                    left: screenWidth * 0.07,
+                    top: screenHeight * 0.21,
                     child: Container(
-                      width: 340,
-                      height: 644,
+                      width: screenWidth * 0.86,
+                      height: screenHeight * 0.75,
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -4280,13 +4354,13 @@ class colorPage extends StatelessWidget {
                       child: ListView(
                         children: [
                           // 동영상 항목 리스트 (중복된 구조로 반복)
-                          for (var i = 0; i < 8; i++) ...[
+                          for (var i = 0; i < 6; i++) ...[
                             Stack(
                               children: [
                                 Container(
-                                  margin: EdgeInsets.all(10),
-                                  width: 294,
-                                  height: 111,
+                                  margin: EdgeInsets.all(screenWidth * 0.03),
+                                  width: screenWidth * 0.77,
+                                  height: screenHeight * 0.13,
                                   decoration: ShapeDecoration(
                                     color: Color(0x00D9D9D9),
                                     shape: RoundedRectangleBorder(
@@ -4297,11 +4371,11 @@ class colorPage extends StatelessWidget {
                                   ),
                                 ),
                                 Positioned(
-                                  left: 20,
-                                  top: 30,
+                                  left: screenWidth * 0.07,
+                                  top: screenHeight * 0.038,
                                   child: Container(
-                                    width: 70,
-                                    height: 70,
+                                    width: screenWidth * 0.15,
+                                    height: screenHeight * 0.1,
                                     decoration: ShapeDecoration(
                                       color: Colors.red,
                                       shape: RoundedRectangleBorder(
@@ -4312,32 +4386,32 @@ class colorPage extends StatelessWidget {
                                   ),
                                 ),
                                 Positioned(
-                                  left: 110,
-                                  top: 50,
+                                  left: screenWidth * 0.3,
+                                  top: screenHeight * 0.05,
                                   child: SizedBox(
-                                    width: 70,
-                                    height: 70,
+                                    width: screenWidth * 0.35,
+                                    height: screenHeight * 035,
                                     child: Text(
                                       '빨강',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 30,
+                                        fontSize: screenHeight * 0.05,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  left: 185,
-                                  top: 50,
+                                  left: screenWidth * 0.5,
+                                  top: screenHeight * 0.05,
                                   child: SizedBox(
-                                    width: 150,
-                                    height: 70,
+                                    width: screenWidth * 0.35,
+                                    height: screenHeight * 0.35,
                                     child: Text(
                                       '\$1,000',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 30,
+                                        fontSize: screenHeight * 0.05,
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
