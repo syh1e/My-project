@@ -51,6 +51,7 @@ class homepage extends StatelessWidget {
       Navigator.pushNamed(context, '/login');
     });
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 255, 255, 2555),
       body: Center(
         child: Image.asset("assets/images/loading.png"),
       ),
@@ -221,6 +222,16 @@ class MainPage extends StatelessWidget {
                             Navigator.pushNamed(context, '/mypage');
                           },
                         ),
+                        SizedBox(width: screenWidth * 0.02), // 아이콘 간 간격 추가
+                        IconButton(
+                          icon: Icon(Icons.store),
+                          color: Colors.black,
+                          iconSize: screenWidth * 0.08, // 아이콘 크기도 화면 비율에 맞춤
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/food');
+                          },
+                          tooltip: '상점으로 이동', // 버튼 위에 커서를 올렸을 때 표시될 힌트
+                        ),
                       ],
                     ),
                   ),
@@ -376,18 +387,18 @@ class MainPage extends StatelessWidget {
 
                   // 캐릭터 이미지 추가
                   Positioned(
-                    left: screenWidth * 0.35, // 화면 중앙에 맞추기 위해 수정
-                    top: screenHeight * 0.3, // 위에서 적당한 위치로 수정
+                    left: screenWidth * 0.25, // 화면 중앙에 맞추기 위해 수정
+                    top: screenHeight * 0.2, // 위에서 적당한 위치로 수정
                     child: Image.asset(
-                      'assets/images/character.png', // 이미지 경로 수정
-                      width: screenWidth * 0.3, // 적절한 크기로 조정
-                      height: screenWidth * 0.3,
+                      'assets/images/character_1.png', // 이미지 경로 수정
+                      width: screenWidth * 0.4, // 적절한 크기로 조정
+                      height: screenWidth * 0.675,
                       fit: BoxFit.cover,
                     ),
                   ),
                   Positioned(
                     left: screenWidth * 0.03,
-                    top: screenHeight * 0.63,
+                    top: screenHeight * 0.60,
                     child: Container(
                       width: screenWidth * 0.3,
                       height: screenHeight * 0.07,
@@ -404,15 +415,6 @@ class MainPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.store,
-                        size: 30, color: Colors.black), // 상점 모양 아이콘
-                    onPressed: () {
-                      // 버튼 클릭 시 동작
-                      Navigator.pushNamed(context, '/food');
-                    },
-                    tooltip: '상점으로 이동', // 버튼 위에 커서를 올렸을 때 표시될 힌트
                   ),
                 ],
               ),
@@ -635,7 +637,7 @@ class WeekGoal extends StatelessWidget {
                   width: 92,
                   height: 53,
                   child: Text(
-                    '나이키위',
+                    '키위',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 23,
@@ -1237,14 +1239,14 @@ class _MonthlySummaryPageState extends State<MonthPage> {
 
     if (expenseData != null) {
       List<dynamic> expenseList = jsonDecode(expenseData);
-      totalExpense =
-          expenseList.fold(0.0, (sum, e) => sum + (e['amount'] ?? 0.0));
+      totalExpense = expenseList.fold(
+          0.0, (sum, e) => sum + (double.tryParse(e['amount']) ?? 0.0));
     }
 
     if (incomeData != null) {
       List<dynamic> incomeList = jsonDecode(incomeData);
-      totalIncome =
-          incomeList.fold(0.0, (sum, e) => sum + (e['amount'] ?? 0.0));
+      totalIncome = incomeList.fold(
+          0.0, (sum, e) => sum + (double.tryParse(e['amount']) ?? 0.0));
     }
 
     setState(() {});
@@ -1289,18 +1291,25 @@ class _MonthlySummaryPageState extends State<MonthPage> {
                     lastDay: DateTime.utc(2024, 12, 31),
                     focusedDay: _focusedDay,
                     selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    onDaySelected: (selectedDay, focusedDay) {
+                    onDaySelected: (selectedDay, focusedDay) async {
                       setState(() {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
-                      Navigator.push(
+
+                      // 상세 페이지로 이동 후 데이터 반환
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
                               DetailPage(selectedDate: selectedDay),
                         ),
                       );
+
+                      // 새 데이터로 업데이트
+                      if (result == true) {
+                        _loadData();
+                      }
                     },
                     calendarStyle: CalendarStyle(
                       todayDecoration: BoxDecoration(
@@ -1329,162 +1338,6 @@ class _MonthlySummaryPageState extends State<MonthPage> {
               Navigator.pushNamed(context, '/detail2'); // 소비 내역 보기 기능 추가
             },
             child: Text('소비 내역 자세히 보기'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// 소비 내역 자세히 보기
-class Detail extends StatefulWidget {
-  final List<Map<String, dynamic>> records; // 소비 내역
-  final String selectedMonth; // 선택한 달
-
-  Detail({required this.records, required this.selectedMonth});
-
-  @override
-  _DetailState createState() => _DetailState();
-}
-
-class _DetailState extends State<Detail> {
-  String? selectedCategory; // 선택된 카테고리
-  double totalAmount = 0.0; // 총 소비 금액
-  Map<String, double> categoryTotals = {}; // 카테고리별 총 금액
-
-  // 카테고리 색상 맵
-  final Map<String, Color> categoryColors = {
-    '식비': Colors.orange,
-    '쇼핑': Colors.green,
-    '이체': Colors.blue,
-    '기타': Colors.grey,
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _calculateTotals();
-  }
-
-  void _calculateTotals() {
-    // 전체 금액 및 카테고리별 합계 계산
-    double total = 0.0;
-    Map<String, double> tempCategoryTotals = {};
-
-    for (var record in widget.records) {
-      if (record['month'] == widget.selectedMonth) {
-        final category = record['category'];
-        final amount = record['amount'] ?? 0.0;
-
-        total += amount;
-
-        if (tempCategoryTotals.containsKey(category)) {
-          tempCategoryTotals[category] = tempCategoryTotals[category]! + amount;
-        } else {
-          tempCategoryTotals[category] = amount;
-        }
-      }
-    }
-
-    setState(() {
-      totalAmount = total;
-      categoryTotals = tempCategoryTotals;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // 선택된 카테고리에 해당하는 내역 필터링
-    final filteredRecords = selectedCategory == null
-        ? []
-        : widget.records
-            .where((record) =>
-                record['month'] == widget.selectedMonth &&
-                record['category'] == selectedCategory)
-            .toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.selectedMonth} 소비 내역'),
-      ),
-      body: Column(
-        children: [
-          // 총 소비 금액 표시
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '${widget.selectedMonth} 총 소비 금액: ${totalAmount.toStringAsFixed(0)}원',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // 카테고리별 비율 표시
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: categoryTotals.keys.map((category) {
-                final percentage =
-                    (categoryTotals[category]! / totalAmount) * 100;
-                return Flexible(
-                  flex: percentage.toInt(),
-                  child: Container(
-                    height: 20,
-                    color: categoryColors[category],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-
-          // 카테고리 버튼
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: categoryTotals.keys.map((category) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedCategory = category;
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: selectedCategory == category
-                          ? categoryColors[category]
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: categoryColors[category]!),
-                    ),
-                    child: Text(
-                      category,
-                      style: TextStyle(
-                        color: selectedCategory == category
-                            ? Colors.white
-                            : categoryColors[category],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-
-          // 선택된 카테고리 내역
-          Expanded(
-            child: selectedCategory == null
-                ? Center(child: Text('카테고리를 선택하세요.'))
-                : ListView.builder(
-                    itemCount: filteredRecords.length,
-                    itemBuilder: (context, index) {
-                      final record = filteredRecords[index];
-                      return ListTile(
-                        title: Text(record['description']),
-                        trailing: Text('${record['amount']}원'),
-                      );
-                    },
-                  ),
           ),
         ],
       ),
@@ -1744,7 +1597,7 @@ class _DetailPageState extends State<DetailPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, true),
               child: Text('취소'),
             ),
             TextButton(
@@ -1763,7 +1616,7 @@ class _DetailPageState extends State<DetailPage> {
                   }
                 });
                 _saveData();
-                Navigator.pop(context);
+                Navigator.pop(context, true);
               },
               child: Text('추가'),
             ),
@@ -1875,6 +1728,162 @@ class _DetailPageState extends State<DetailPage> {
   }
 }
 
+// 소비 내역 자세히 보기
+class Detail extends StatefulWidget {
+  final List<Map<String, dynamic>> records; // 소비 내역
+  final String selectedMonth; // 선택한 달
+
+  Detail({required this.records, required this.selectedMonth});
+
+  @override
+  _DetailState createState() => _DetailState();
+}
+
+class _DetailState extends State<Detail> {
+  String? selectedCategory; // 선택된 카테고리
+  double totalAmount = 0.0; // 총 소비 금액
+  Map<String, double> categoryTotals = {}; // 카테고리별 총 금액
+
+  // 카테고리 색상 맵
+  final Map<String, Color> categoryColors = {
+    '식비': Colors.orange,
+    '쇼핑': Colors.green,
+    '이체': Colors.blue,
+    '기타': Colors.grey,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateTotals();
+  }
+
+  void _calculateTotals() {
+    // 전체 금액 및 카테고리별 합계 계산
+    double total = 0.0;
+    Map<String, double> tempCategoryTotals = {};
+
+    for (var record in widget.records) {
+      if (record['month'] == widget.selectedMonth) {
+        final category = record['category'];
+        final amount = record['amount'] ?? 0.0;
+
+        total += amount;
+
+        if (tempCategoryTotals.containsKey(category)) {
+          tempCategoryTotals[category] = tempCategoryTotals[category]! + amount;
+        } else {
+          tempCategoryTotals[category] = amount;
+        }
+      }
+    }
+
+    setState(() {
+      totalAmount = total;
+      categoryTotals = tempCategoryTotals;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 선택된 카테고리에 해당하는 내역 필터링
+    final filteredRecords = selectedCategory == null
+        ? []
+        : widget.records
+            .where((record) =>
+                record['month'] == widget.selectedMonth &&
+                record['category'] == selectedCategory)
+            .toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.selectedMonth} 소비 내역'),
+      ),
+      body: Column(
+        children: [
+          // 총 소비 금액 표시
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '${widget.selectedMonth} 총 소비 금액: ${totalAmount.toStringAsFixed(0)}원',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          // 카테고리별 비율 표시
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: categoryTotals.keys.map((category) {
+                final percentage =
+                    (categoryTotals[category]! / totalAmount) * 100;
+                return Flexible(
+                  flex: percentage.toInt(),
+                  child: Container(
+                    height: 20,
+                    color: categoryColors[category],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          // 카테고리 버튼
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: categoryTotals.keys.map((category) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedCategory = category;
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: selectedCategory == category
+                          ? categoryColors[category]
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: categoryColors[category]!),
+                    ),
+                    child: Text(
+                      category,
+                      style: TextStyle(
+                        color: selectedCategory == category
+                            ? Colors.white
+                            : categoryColors[category],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          // 선택된 카테고리 내역
+          Expanded(
+            child: selectedCategory == null
+                ? Center(child: Text('카테고리를 선택하세요.'))
+                : ListView.builder(
+                    itemCount: filteredRecords.length,
+                    itemBuilder: (context, index) {
+                      final record = filteredRecords[index];
+                      return ListTile(
+                        title: Text(record['description']),
+                        trailing: Text('${record['amount']}원'),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class EcoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1933,7 +1942,7 @@ class EcoPage extends StatelessWidget {
                     top: 117,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/eco');
+                        Navigator.popAndPushNamed(context, '/eco');
                       },
                       style: ElevatedButton.styleFrom(
                           fixedSize: const Size(72, 72),
@@ -1963,7 +1972,7 @@ class EcoPage extends StatelessWidget {
                     top: 117,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/card');
+                        Navigator.popAndPushNamed(context, '/card');
                       },
                       style: ElevatedButton.styleFrom(
                           fixedSize: const Size(72, 72),
@@ -1993,7 +2002,7 @@ class EcoPage extends StatelessWidget {
                     top: 117,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/web');
+                        Navigator.popAndPushNamed(context, '/web');
                       },
                       style: ElevatedButton.styleFrom(
                           fixedSize: const Size(72, 72),
@@ -2023,7 +2032,7 @@ class EcoPage extends StatelessWidget {
                     top: 117,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/han');
+                        Navigator.popAndPushNamed(context, '/han');
                       },
                       style: ElevatedButton.styleFrom(
                           fixedSize: const Size(72, 72),
