@@ -53,6 +53,7 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
 
       // Get attendance status for joined studies
       final Map<int, bool> currentAttendanceStatus = {};
+      final Map<int, String> attendanceStatusMap = {};
       for (final study in joinedStudies) {
         try {
           // Call getAttendance for each joined study
@@ -65,6 +66,9 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
             currentAttendanceStatus[study['id']] = userAttendance != null &&
                 (userAttendance['status'] == 'present' ||
                     userAttendance['status'] == 'late');
+            if (userAttendance != null) {
+              attendanceStatusMap[study['id']] = userAttendance['status'];
+            }
           } else {
             currentAttendanceStatus[study['id']] = false;
           }
@@ -79,6 +83,12 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
         _joinedStudies = joinedStudies;
         _joinedStudyIds = joinedStudies.map((s) => s['id'] as int).toSet();
         _attendanceStatus = currentAttendanceStatus;
+        // Add attendance status to each study
+        for (var study in _allStudies) {
+          if (attendanceStatusMap.containsKey(study['id'])) {
+            study['attendance_status'] = attendanceStatusMap[study['id']];
+          }
+        }
         _isLoading = false;
       });
     } catch (e) {
@@ -100,7 +110,7 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('스터디 목록'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -147,9 +157,7 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
         final userId = snapshot.data;
         final isLeader = study['leader_id'] == userId;
         final isJoined = _joinedStudyIds.contains(study['id']);
-        final isAttendanceVerified =
-            _attendanceStatus[study['id']] ?? false; // 해당 스터디의 출석 상태
-
+        final isAttendanceVerified = _attendanceStatus[study['id']] ?? false;
         final isVerifying = _verifyingStudyId == study['id'];
 
         return Card(
@@ -164,49 +172,76 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
                     Text('스터디장: ${study['leader_name']}'),
                     Text('참여 인원: ${study['participant_count']}명'),
                     if (isJoined)
-                      isAttendanceVerified
-                          ? Chip(
-                              label: const Text('출석 완료'),
-                              backgroundColor: Colors.green,
-                              labelStyle: const TextStyle(color: Colors.white),
-                            )
-                          : const Chip(
-                              label: Text('참여 중'),
-                              backgroundColor: Colors.green,
-                              labelStyle: TextStyle(color: Colors.white),
-                            ),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '참여 중',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 trailing: isLeader
-                    ? const Chip(
-                        label: Text('스터디장'),
-                        backgroundColor: Colors.blue,
-                        labelStyle: TextStyle(color: Colors.white),
+                    ? Container(
+                        width: 140,
+                        child: ElevatedButton.icon(
+                          onPressed: null,
+                          icon: Icon(Icons.military_tech),
+                          label: Text('스터디장'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                          ),
+                        ),
                       )
                     : isJoined
                         ? isAttendanceVerified
                             ? Chip(
-                                label: const Text('출석 완료'),
-                                backgroundColor: Colors.green,
+                                label: Text(
+                                    study['attendance_status'] == 'present'
+                                        ? '출석'
+                                        : '출석'),
+                                backgroundColor: Colors.red,
                                 labelStyle:
                                     const TextStyle(color: Colors.white),
                               )
-                            : ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _verifyingStudyId =
-                                        isVerifying ? null : study['id'];
-                                    if (!isVerifying) {
-                                      _attendanceCodeController
-                                          .clear(); // 필드 열 때 초기화
-                                    }
-                                  });
-                                },
-                                child: Text(isVerifying ? '닫기' : '출석 인증'),
+                            : Container(
+                                width: 200,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      _verifyingStudyId =
+                                          isVerifying ? null : study['id'];
+                                      if (!isVerifying) {
+                                        _attendanceCodeController.clear();
+                                      }
+                                    });
+                                  },
+                                  icon: Icon(Icons.check_circle_outline),
+                                  label: Text(isVerifying ? '닫기' : '출석 인증'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                  ),
+                                ),
                               )
                         : ElevatedButton(
                             onPressed: () => _joinStudy(study['id']),
                             child: const Text('참가하기'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
                           ),
                 onTap: () {
                   Navigator.push(
@@ -240,13 +275,17 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
                         decoration: const InputDecoration(
                           hintText: '4자리 코드 입력',
                           border: OutlineInputBorder(),
-                          counterText: '', // Hide the counter
+                          counterText: '',
                         ),
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () => _verifyAttendanceForStudy(study['id']),
                         child: const Text('인증하기'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -325,6 +364,10 @@ class _StudyMemberPageState extends State<StudyMemberPage> {
       }
     }
   }
+
+  Future<void> _showAttendanceVerificationDialog(int studyId) async {
+    // Implementation of _showAttendanceVerificationDialog method
+  }
 }
 
 class StudyDetailPage extends StatefulWidget {
@@ -377,7 +420,7 @@ class _StudyDetailPageState extends State<StudyDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('스터디 상세 정보'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -458,7 +501,7 @@ class _StudyDetailPageState extends State<StudyDetailPage> {
                       child: ElevatedButton(
                         onPressed: () => _joinStudy(widget.study['id']),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 16),
                         ),

@@ -21,7 +21,7 @@ class _CreateStudyPageState extends State<CreateStudyPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('스터디 생성'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -95,9 +95,9 @@ class _CreateStudyPageState extends State<CreateStudyPage> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleCreateStudy,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: Size(double.infinity, 48),
                 ),
                 child: _isLoading
                     ? CircularProgressIndicator(color: Colors.white)

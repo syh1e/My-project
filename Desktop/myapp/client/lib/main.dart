@@ -42,9 +42,20 @@ class _AuthPageState extends State<AuthPage> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 40),
-                _buildIndicator(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.waving_hand,
+                      size: 100,
+                      color: Colors.red,
+                    ),
+                    SizedBox(width: 10),
+                  ],
+                ),
                 SizedBox(height: 30),
                 Text(
                   isLogin ? '로그인하여 시작하세요!' : '회원가입을 진행해주세요!',
@@ -68,8 +79,6 @@ class _AuthPageState extends State<AuthPage> {
                   SizedBox(height: 12),
                   _buildTextField(schoolController, '학교'),
                   SizedBox(height: 12),
-                  _buildIdCheckButton(),
-                  SizedBox(height: 12),
                 ],
                 _buildButton(
                   isLogin ? '로그인' : '회원가입',
@@ -90,6 +99,27 @@ class _AuthPageState extends State<AuthPage> {
     String label, {
     bool isPassword = false,
   }) {
+    if (label == '아이디' && !isLogin) {
+      return Container(
+        width: 300,
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(),
+            suffixIcon: TextButton(
+              onPressed: _checkIdAvailability,
+              child: Text(
+                '중복 확인',
+                style: TextStyle(
+                  color: idChecked ? Colors.green : Colors.red,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Container(
       width: 300,
       child: TextField(
@@ -111,7 +141,7 @@ class _AuthPageState extends State<AuthPage> {
         onPressed: onPressed,
         child: Text(text),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.red,
           foregroundColor: Colors.white,
         ),
       ),
@@ -128,43 +158,7 @@ class _AuthPageState extends State<AuthPage> {
       },
       child: Text(
         isLogin ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인',
-        style: TextStyle(color: Colors.blue),
-      ),
-    );
-  }
-
-  Widget _buildIdCheckButton() {
-    return Container(
-      width: 300,
-      child: ElevatedButton(
-        onPressed: _checkIdAvailability,
-        child: Text('아이디 중복 확인'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: idChecked ? Colors.green : Colors.grey,
-          foregroundColor: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _dot(isLogin ? 1 : 0),
-        SizedBox(width: 6),
-        _dot(isLogin ? 0 : 1),
-      ],
-    );
-  }
-
-  Widget _dot(int active) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: active == 1 ? Colors.black26 : Color(0xFFE0E0E0),
-        shape: BoxShape.circle,
+        style: TextStyle(color: Colors.red),
       ),
     );
   }
@@ -317,7 +311,7 @@ class select_roll extends StatelessWidget {
       backgroundColor: Color(0xFFF7F8FA),
       appBar: AppBar(
         title: Text('역할 선택'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false, // 뒤로가기 버튼 제거
         actions: <Widget>[
@@ -335,8 +329,14 @@ class select_roll extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(
+              Icons.person,
+              size: 200,
+              color: Colors.red,
+            ),
+            SizedBox(height: 16),
             Text(
-              '역할을 선택해주세요',
+              '역할을 선택해주세요!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 40),
@@ -369,13 +369,26 @@ class select_roll extends StatelessWidget {
     VoidCallback onPressed,
   ) {
     return Container(
-      width: 200,
-      height: 50,
+      width: 250,
+      height: 60,
       child: ElevatedButton(
         onPressed: onPressed,
-        child: Text(text),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              text == '스터디장' ? Icons.workspace_premium : Icons.menu_book,
+              size: 24,
+            ),
+            SizedBox(width: 12),
+            Text(
+              text,
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.red,
           foregroundColor: Colors.white,
         ),
       ),

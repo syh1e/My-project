@@ -51,7 +51,7 @@ class _StudyLeaderPageState extends State<StudyLeaderPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('내 스터디 관리'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -107,7 +107,7 @@ class _StudyLeaderPageState extends State<StudyLeaderPage> {
             MaterialPageRoute(builder: (context) => CreateStudyPage()),
           ).then((_) => _loadStudies());
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         child: Icon(Icons.add, color: Colors.white),
       ),
     );

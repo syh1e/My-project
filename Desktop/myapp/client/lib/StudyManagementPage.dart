@@ -195,7 +195,7 @@ class _StudyManagementPageState extends State<StudyManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.studyName),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -338,6 +338,21 @@ class _StudyManagementPageState extends State<StudyManagementPage> {
                 ),
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudyManagementPage(
+                studyId: 0,
+                studyName: '새 스터디',
+              ),
+            ),
+          );
+        },
+        backgroundColor: Colors.red,
+        child: Icon(Icons.add),
+      ),
     );
   }
 }

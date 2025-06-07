@@ -141,6 +141,8 @@ class _AttendanceSessionPageState extends State<AttendanceSessionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.study['name']} 출석'),
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -242,7 +244,7 @@ class _AttendanceSessionPageState extends State<AttendanceSessionPage> {
                           record['status'] == 'present'
                               ? '출석'
                               : record['status'] == 'late'
-                                  ? '지각'
+                                  ? '출석'
                                   : '결석',
                           style: TextStyle(
                             color: record['status'] == 'present'

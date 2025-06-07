@@ -291,6 +291,8 @@ class _StudyDetailPageState extends State<StudyDetailPage>
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.study['name'] ?? '스터디 상세'),
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
           actions: [
             if (widget.isLeader) // 스터디장에게만 삭제 버튼 표시
               IconButton(
@@ -339,6 +341,10 @@ class _StudyDetailPageState extends State<StudyDetailPage>
                                 null) // 출석 시작 전 (로딩 중이 아닐 때만 버튼 표시)
                               ElevatedButton(
                                 onPressed: _startAttendance,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                ),
                                 child: const Text('출석 인증 시작'),
                               )
                             else if (_attendanceCode !=
@@ -452,7 +458,7 @@ class _StudyDetailPageState extends State<StudyDetailPage>
                         record['status'] == 'present'
                             ? '출석'
                             : record['status'] == 'late'
-                                ? '지각'
+                                ? '출석'
                                 : '결석',
                         style: TextStyle(
                           color: record['status'] == 'present'
