@@ -1,0 +1,7 @@
+android {
+    // ... existing code ...
+    
+    ndkVersion "25.1.8937393"
+ 
+    // ... existing code ...
+} 
