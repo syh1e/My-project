@@ -562,11 +562,10 @@ class DynamicDeadlyBlock(DeadlyBlock):
 
                 init_vel = pygame.Vector2(vx, vy)
 
-                # 각속도는 기존 계산보다 작게 유지하되, 조금 더 올려 자연스러운 회전 연출
                 # r vector from piece center to block center
                 r = center - pygame.Vector2(block_center)
                 r_cross = r.x * init_vel.y - r.y * init_vel.x
-                # 증가된 스케일로 초깃값을 더 주고 clamp 범위도 약간 확장
+                
                 init_ang_vel = (r_cross / I) * 0.6 if I != 0 else 0.0
                 # clamp
                 max_ang = 9.0

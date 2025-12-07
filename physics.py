@@ -18,7 +18,7 @@ def collision_aabb_aabb(a: AABB, b: AABB) -> bool:
         return False
     return True
 
-# 새로 추가: 2D 원-원(구) 충돌 검사 (성능을 위해 제곱거리 사용)
+
 def circle_circle_collision(pos1: pygame.Vector2, r1: float, pos2: pygame.Vector2, r2: float) -> bool:
     """두 원의 충돌 여부를 반환합니다. pos는 Vector2, r은 반지름."""
     rsum = r1 + r2
